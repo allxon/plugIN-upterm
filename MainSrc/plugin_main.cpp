@@ -9,12 +9,12 @@
 #include "../PluginSDK/UpdatePluginJson.h"
 #include "../PluginSDK/PluginException.h"
 #include "../PluginSDK/CommandAcksPluginJson.h"
-#include "../Plugins/TmatePlugin.h"
+#include "../Plugins/UptermPlugin.h"
 
 using namespace std;
 
 #define BDM_AGENT "BDM_Agent"
-#define PID_FILE "/var/run/tmatePlugin.pid"
+#define PID_FILE "/var/run/uptermPlugin.pid"
 
 extern bool gotSigInt;
 CConnection* connection;
@@ -217,10 +217,10 @@ CONNECT_WEBSOCKET:
             {
                 string sampleName = config->GetSampleName();
                 UTL_LOG_INFO("sample name = %s", sampleName.c_str());
-                if (sampleName.compare(SAMPLE_TMATE_PLUGIN) == 0)
+                if (sampleName.compare(SAMPLE_UPTERM_PLUGIN) == 0)
                 {
-                    CTmatePlugin *tmatePlugin = new CTmatePlugin(config);
-                    if (tmatePlugin->SetNotifyPluginUpdate()) wsclientobj->SetSamplePlugin(tmatePlugin);
+                    CUptermPlugin *uptermPlugin = new CUptermPlugin(config);
+                    if (uptermPlugin->SetNotifyPluginUpdate()) wsclientobj->SetSamplePlugin(uptermPlugin);
                 }
                 else
                 {

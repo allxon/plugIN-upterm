@@ -12,7 +12,7 @@ GCC_GXX_WARNINGS = -Wall -Wno-error -Wno-packed -Wpointer-arith -Wredundant-decl
 CFLAGS = -Os -DDEBUG
 LDFLAGS = -lm
 
-TARGET = plugIN-tmate
+TARGET = plugIN-upterm
 UTIL_FOLDER = $(PWD)/Util
 MAIN_FOLDER = $(PWD)/MainSrc
 PLUGINS_FOLDER = $(PWD)/Plugins

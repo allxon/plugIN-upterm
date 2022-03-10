@@ -1,14 +1,14 @@
 {
-  "appGUID": "286b0652-c5ef-46c0-aa8c-7b617bbf6ab9",
-  "appName": "AllxonTmatePlugin",
-  "displayName": "Tmate plugIN",
+  "appGUID": "3ff0bf0a-17a0-47c0-b9f6-229191393182",
+  "appName": "AllxonuptermPlugin",
+  "displayName": "Upterm plugIN",
   "type": "ib",
   "version": "1.00.2003",
-  "startCommand": "/opt/allxon/plugIN/286b0652-c5ef-46c0-aa8c-7b617bbf6ab9/scripts/startPlugin.sh",
-  "stopCommand": "/opt/allxon/plugIN/286b0652-c5ef-46c0-aa8c-7b617bbf6ab9/scripts/stopPlugin.sh",
+  "startCommand": "/opt/allxon/plugIN/3ff0bf0a-17a0-47c0-b9f6-229191393182/scripts/startPlugin.sh",
+  "stopCommand": "/opt/allxon/plugIN/3ff0bf0a-17a0-47c0-b9f6-229191393182/scripts/stopPlugin.sh",
   "modules": [
     {
-      "moduleName": "tmateWebConsole",
+      "moduleName": "uptermWebConsole",
       "displayName": "Remote Console",
       "properties": [
         {
@@ -18,8 +18,8 @@
           "displayType": "link",
           "value":
           {
-            "url": "https://tmate.io",
-            "alias": "tmate.io"
+            "url": "https://upterm.dev",
+            "alias": "upterm.dev"
           }
         },
         {
@@ -29,7 +29,7 @@
           "displayType": "link",
           "value":
           {
-            "url": "https://github.com/allxon/plugIN-tmate/blob/master/LICENSE",
+            "url": "https://github.com/allxon/plugIN-upterm/blob/master/LICENSE",
             "alias": "The 3-Clause BSD License"
           }
         }
@@ -38,13 +38,13 @@
         {
           "name": "version",
           "displayName": "Version",
-          "description": "The software version of tmate.",
+          "description": "The software version of upterm.",
           "displayType": "string"
         },
         {
           "name": "status",
           "displayName": "Session",
-          "description": "Running status of tmate.",
+          "description": "Running status of upterm.",
           "displayType": "string"
         },
         {
@@ -64,15 +64,15 @@
           "type": "asynchronous",
           "displayCategory": "Session",
           "displayName": "Open session",
-          "description": "Open a tmate session to enable instant terminal sharing.",
+          "description": "Open a upterm session to enable instant terminal sharing.",
           "params": [
             {
               "name": "password",
               "displayName": "Password",
-              "description": "Set a password for the user account tmate",
+              "description": "Set a password for the user account upterm",
               "displayType": "string",
               "required": true,
-              "defaultValue":"tmate"
+              "defaultValue":"upterm"
             }
           ]
         },
@@ -81,23 +81,23 @@
           "type": "asynchronous",
           "displayCategory": "Session",
           "displayName": "Close session",
-          "description": "Close the tmate session to terminate terminal sharing.",
+          "description": "Close the upterm session to terminate terminal sharing.",
           "params": []
         },
         {
           "name": "install",
           "type": "asynchronous",
           "displayCategory": "Installation",
-          "displayName": "Install tmate",
-          "description": "Install tmate to be able to do instant terminal sharing.",
+          "displayName": "Install upterm",
+          "description": "Install upterm to be able to do instant terminal sharing.",
           "params": []
         },
         {
           "name": "uninstall",
           "type": "asynchronous",
           "displayCategory": "Installation",
-          "displayName": "Uninstall tmate",
-          "description": "Uninstall tmate.",
+          "displayName": "Uninstall upterm",
+          "description": "Uninstall upterm.",
           "params": []
         }
       ]

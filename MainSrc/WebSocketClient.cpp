@@ -9,7 +9,7 @@
 #include "../Util/include/Utl_Log.h"
 #include "../Util/include/vpl_error.h"
 #include "ConcreteStates.h"
-#include "../Plugins/TmatePlugin.h"
+#include "../Plugins/UptermPlugin.h"
 
 using namespace std;
 
@@ -25,13 +25,13 @@ void SendNotifyPluginStates(CWebSocketClient *ptr, bitset<4> statesUpdated)
 #endif
     if (statesUpdated == StateUpdated::none) return;
     
-    CTmatePlugin *plugin = (CTmatePlugin *) ptr->GetSamplePlugin();
+    CUptermPlugin *plugin = (CUptermPlugin *) ptr->GetSamplePlugin();
     cJSON *states = cJSON_CreateArray();
     if ((statesUpdated & StateUpdated::version) == StateUpdated::version) cJSON_AddItemToArray(states, plugin->AddVersionState());
     if ((statesUpdated & StateUpdated::status) == StateUpdated::status) cJSON_AddItemToArray(states, plugin->AddStatusState());
     if ((statesUpdated & StateUpdated::web) == StateUpdated::web) cJSON_AddItemToArray(states, plugin->AddWebLinkState());
     if ((statesUpdated & StateUpdated::ssh) == StateUpdated::ssh) cJSON_AddItemToArray(states, plugin->AddSshLinkState());
-    char *statesNotifyString = plugin->SetNotifyStates("tmateWebConsole", states);
+    char *statesNotifyString = plugin->SetNotifyStates("uptermWebConsole", states);
     ptr->SendPluginNotify(ptr, statesNotifyString);
     free(statesNotifyString);
 }
@@ -41,7 +41,7 @@ void SendNotifyPluginCommandAcks(CWebSocketClient *ptr)
 {
     if (!ptr) return;
 
-    CTmatePlugin *plugin = (CTmatePlugin *) ptr->GetSamplePlugin();
+    CUptermPlugin *plugin = (CUptermPlugin *) ptr->GetSamplePlugin();
     if (!plugin) return;
 
     CCommandPluginJson *receivedCommand = ptr->GetReceivedCommand();
@@ -227,7 +227,7 @@ void CWebSocketClient::On_message(void* c, websocketpp::connection_hdl hdl, WebC
 #ifdef TEST_UPDATE
     else if (MessageType::api_notifyPluginCommand.compare(msgType) == 0) // notifyPluginCommand
     {
-        CTmatePlugin *plugin = (CTmatePlugin *) ptr->GetSamplePlugin();
+        CUptermPlugin *plugin = (CUptermPlugin *) ptr->GetSamplePlugin();
         if (!plugin) return;
         // Create CCommandPluginJson object for parsing received message of command
         CCommandPluginJson *receivedCommand = new CCommandPluginJson(payload, plugin->accessKey);
@@ -246,7 +246,7 @@ void CWebSocketClient::On_message(void* c, websocketpp::connection_hdl hdl, WebC
     }
     else if (MessageType::api_notifyPluginAlarmUpdate.compare(msgType) == 0) // notifyPluginAlarmUpdate
     {
-        CTmatePlugin *plugin = (CTmatePlugin *) ptr->GetSamplePlugin();
+        CUptermPlugin *plugin = (CUptermPlugin *) ptr->GetSamplePlugin();
         if (!plugin) return;
         plugin->UpdateAlarmsData(payload);
 
@@ -421,7 +421,7 @@ static UTLTHREAD_FN_DECL NotifyUpdateThread(void* arg)
 static UTLTHREAD_FN_DECL NotifyCommandThread(void* arg)
 {
     CWebSocketClient *ptr = (CWebSocketClient*)arg;
-    CTmatePlugin *plugin = (CTmatePlugin *) ptr->GetSamplePlugin();
+    CUptermPlugin *plugin = (CUptermPlugin *) ptr->GetSamplePlugin();
     if (ptr && plugin) {
         CUpdatePluginJson *updatePluginObj = plugin->GetUpdateData()->GetNotifyPluginUpdate();
         UTL_LOG_INFO("NotifyCommandThread running");
@@ -497,7 +497,7 @@ bool CWebSocketClient::SendPluginNotify(CWebSocketClient *ptr, const char *notif
 static UTLTHREAD_FN_DECL NotifyDataThread(void* arg)
 {
     CWebSocketClient *ptr = (CWebSocketClient*)arg;
-    CTmatePlugin *plugin = (CTmatePlugin *) ptr->GetSamplePlugin();
+    CUptermPlugin *plugin = (CUptermPlugin *) ptr->GetSamplePlugin();
     if (ptr && plugin)
     {
         CUpdatePluginJson *updatePluginObj = plugin->GetUpdateData()->GetNotifyPluginUpdate();

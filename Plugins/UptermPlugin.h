@@ -1,16 +1,16 @@
-#ifndef _TMATEPLUGIN_H_
-#define _TMATEPLUGIN_H_
+#ifndef _UPTERMPLUGIN_H_
+#define _UPTERMPLUGIN_H_
 
 #include <bitset>
 #include "PluginSample.h"
 #include "../PluginSDK/AlertsPluginJson.h"
 
-#define SAMPLE_TMATE_PLUGIN      "TmatePlugin"
+#define SAMPLE_UPTERM_PLUGIN      "UptermPlugin"
 #define PLUGINS_PATH                "/opt/allxon/plugIN/"
 #define SCRIPTS_STATES_PATH         "scripts/states/"
 #define SCRIPTS_COMMANDS_PATH       "scripts/commands/"
 #define CONFING_PATH                "config/"
-#define PLUGIN_UPDATE_CONFIG        "tmatePluginUpdate.json"
+#define PLUGIN_UPDATE_CONFIG        "uptermPluginUpdate.json"
 
 
 class StateUpdated
@@ -32,7 +32,7 @@ public:
     static std::string GetName(std::bitset<1> alertStatus);
 };
 
-class TmateStates
+class UptermStates
 {
 public:
     const static std::string status;
@@ -41,7 +41,7 @@ public:
     const static std::string ssh;
 };
 
-class TmateCommands
+class UptermCommands
 {
 public:
     const static std::string install;
@@ -51,13 +51,13 @@ public:
     const static std::string password;
 };
 
-class CTmatePlugin : public CPluginSample
+class CUptermPlugin : public CPluginSample
 {
 public:
-    CTmatePlugin();
-    CTmatePlugin(CPluginSampleConfig *sampleConfig);
-    CTmatePlugin(std::string apiVersion, bool minify, std::string appGUID, std::string accessKey);
-    ~CTmatePlugin();
+    CUptermPlugin();
+    CUptermPlugin(CPluginSampleConfig *sampleConfig);
+    CUptermPlugin(std::string apiVersion, bool minify, std::string appGUID, std::string accessKey);
+    ~CUptermPlugin();
 
     CUpdatePluginJson *SetNotifyPluginUpdate();
     CAlarmUpdatePluginJson *GetAlarmUpdateObject() { return m_alarmUpdateObj; }
@@ -76,7 +76,7 @@ public:
     std::string m_versionOutput;
     std::string m_webOutput;
     std::string m_sshOutput;
-    const static std::string moduleTmate;
+    const static std::string moduleUpterm;
 
 protected:
     void Init();

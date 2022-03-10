@@ -7,9 +7,9 @@ exec > "${CURRENT}"
 
 while :
 do
-	which tmate > /dev/null || { echo "Not installed"; break; }
+	which upterm > /dev/null || { echo "Not installed"; break; }
 
-	tmate -V | grep -Eo "[0-9.]+"
+	upterm -V | grep -Eo "[0-9.]+"
 
 	break
 done

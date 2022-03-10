@@ -1,7 +1,7 @@
 #!/bin/bash
 
 plugin_appguid=3ff0bf0a-17a0-47c0-b9f6-229191393182
-plugin_folder=plugIN-tmate
+plugin_folder=plugIN-upterm
 
 sudo mkdir -p $ALLXON_PLUGIN_DIR/
 
