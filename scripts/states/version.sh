@@ -9,7 +9,7 @@ while :
 do
 	which upterm > /dev/null || { echo "Not installed"; break; }
 
-	upterm -V | grep -Eo "[0-9.]+"
+	upterm version 
 
 	break
 done

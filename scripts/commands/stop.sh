@@ -1,11 +1,22 @@
 #!/bin/bash
 
-exec > "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]%.*}").output"
+OUTPUT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]%.*}").output"
 
-which tmate > /dev/null || { echo "Not installed"; exit 0; }
+if [ $UID -eq 0 ]; then
+    exec > "${OUTPUT}"
+    which upterm > /dev/null || id upterm > /dev/null 2>&1 || { echo "Not installed"; exit 0; }
+    chown upterm:sudo "${OUTPUT}"
+    exec su -c "$0" upterm "$@"
+    exit $?
+fi
 
-test -e /tmp/tmate.sock > /dev/null || { echo "Stopped"; exit 0; }
+exec >> "${OUTPUT}"
 
-test -e /tmp/tmate.sock > /dev/null && pidof tmate > /dev/null || rm -f /tmp/tmate.sock
+# only upterm user can run
+if [ $(whoami) != "upterm" ]; then
+   echo "Permission deny"; exit 0;
+fi
 
-pidof tmate > /dev/null && pidof tmate | xargs kill && echo "Stopped"
+which upterm > /dev/null || { echo "Not installed"; exit 0; }
+which tmux > /dev/null || { echo "Not installed"; exit 0; }
+tmux kill-session -t plugin_upterm:plugin_upterm > /dev/null && echo "Stopped"

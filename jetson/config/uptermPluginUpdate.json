@@ -48,11 +48,6 @@
           "displayType": "string"
         },
         {
-          "name": "web",
-          "displayName": "Web",
-          "displayType": "link"
-        },
-        {
           "name": "ssh",
           "displayName": "SSH",
           "displayType": "link"

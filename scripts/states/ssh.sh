@@ -1,16 +1,16 @@
 #!/bin/bash
 
-OUTPUT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]%.*}").output"
-CURRENT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]%.*}").current"
+CURRENT_SH_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+OUTPUT="${CURRENT_SH_DIR}/$(basename "${BASH_SOURCE[0]%.*}").output"
+CURRENT="${CURRENT_SH_DIR}/$(basename "${BASH_SOURCE[0]%.*}").current"
 
 exec > "${CURRENT}"
 
 while :
 do
-	test -e /tmp/tmate.sock > /dev/null || { echo "{\"url\":\"\",\"alias\":\"N/A\"}"; break; }
+	pidof upterm > /dev/null || { echo "{\"url\":\"\",\"alias\":\"N/A\"}"; break; }
 
-	URL=$(tmate -S /tmp/tmate.sock display -p '#{tmate_ssh}' | sed 's#ssh #ssh://#')
-
+	URL=$(cat ${CURRENT_SH_DIR}/../commands/ssh_login_statement)
 	echo "{\"url\":\"${URL}\",\"alias\":\"Connect\"}"
 
 	break

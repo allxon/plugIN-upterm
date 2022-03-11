@@ -1,11 +1,11 @@
 {
-  "appGUID": "286b0652-c5ef-46c0-aa8c-7b617bbf6ab9",
-  "appName": "AllxonTmatePlugin",
-  "displayName": "Tmate plugIN",
+  "appGUID": "9cdfc058-e3f8-4bf4-8621-d2114eade9d9",
+  "appName": "AllxonUptermPlugin",
+  "displayName": "Upterm plugIN",
   "type": "ib",
   "version": "1.00.2003",
-  "startCommand": "/opt/allxon/plugIN/286b0652-c5ef-46c0-aa8c-7b617bbf6ab9/scripts/startPlugin.sh",
-  "stopCommand": "/opt/allxon/plugIN/286b0652-c5ef-46c0-aa8c-7b617bbf6ab9/scripts/stopPlugin.sh",
+  "startCommand": "/opt/allxon/plugIN/9cdfc058-e3f8-4bf4-8621-d2114eade9d9/scripts/startPlugin.sh",
+  "stopCommand": "/opt/allxon/plugIN/9cdfc058-e3f8-4bf4-8621-d2114eade9d9/scripts/stopPlugin.sh",
   "modules": [
     {
       "moduleName": "uptermWebConsole",
@@ -46,11 +46,6 @@
           "displayName": "Session",
           "description": "Running status of upterm.",
           "displayType": "string"
-        },
-        {
-          "name": "web",
-          "displayName": "Web",
-          "displayType": "link"
         },
         {
           "name": "ssh",

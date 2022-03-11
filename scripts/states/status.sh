@@ -7,9 +7,7 @@ exec > "${CURRENT}"
 
 while :
 do
-	which tmate > /dev/null || { echo "Not running"; break; }
-
-	test -e /tmp/tmate.sock > /dev/null || { echo "Closed"; break; }
+	pidof upterm > /dev/null || { echo "Closed"; break; }
 
 	echo "Open"
 
