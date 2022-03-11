@@ -1,6 +1,6 @@
 #!/bin/bash
 
-plugin_appguid=3ff0bf0a-17a0-47c0-b9f6-229191393182
+plugin_appguid=9cdfc058-e3f8-4bf4-8621-d2114eade9d9
 
 echo "Stop running plugIN-upterm."
 currentShDirectory=$(dirname ${BASH_SOURCE})
