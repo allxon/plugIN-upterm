@@ -98,7 +98,6 @@ After installed all dependency packages, you can build this project under the fo
     * version.sh - To get the upterm software version number
     * status.sh - To get the upterm current status, i.e. Not running, Open and Closed.
     * ssh.sh - To get the opened session link for ssh.
-    * web.sh - To get the opened session link for web remote terminal.
 
 ## Developer Zone
 ```
