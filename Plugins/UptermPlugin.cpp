@@ -153,13 +153,6 @@ void CUptermPlugin::UpdateStates(bitset<4> updateMask)
         RunStatesScript(cmdStatus);
     }
     
-    if ((updateMask & StateUpdated::web) == StateUpdated::web)
-    {
-        string cmdWeb = m_pluginPath;
-        cmdWeb.append(SCRIPTS_STATES_PATH).append(UptermStates::web).append(SCRIPT_EXT);
-        RunStatesScript(cmdWeb);
-    }
-    
     if ((updateMask & StateUpdated::ssh) == StateUpdated::ssh)
     {
         string cmdSsh = m_pluginPath;
@@ -221,15 +214,15 @@ bitset<4> CUptermPlugin::IsStateFilesChanged()
         UTL_LOG_INFO("version output is updated.");
 #endif
     }
-    int rWeb = FileIsModified(m_webOutput.c_str(), webTime, newMTime);
-    if (rWeb > 0)
-    {
-        webTime = newMTime;
-        result = result | StateUpdated::web;
-#ifdef DEBUG
-        UTL_LOG_INFO("web output is updated.");
-#endif
-    }
+//     int rWeb = FileIsModified(m_webOutput.c_str(), webTime, newMTime);
+//     if (rWeb > 0)
+//     {
+//         webTime = newMTime;
+//         result = result | StateUpdated::web;
+// #ifdef DEBUG
+//         UTL_LOG_INFO("web output is updated.");
+// #endif
+//     }
     int rSsh = FileIsModified(m_sshOutput.c_str(), sshTime, newMTime);
     if (rSsh > 0)
     {
