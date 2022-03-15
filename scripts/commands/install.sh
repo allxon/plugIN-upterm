@@ -14,6 +14,7 @@ test -e /tmp/plugin-upterm.tar.gz || rm -rf /tmp/plugin-upterm.tar.gz
 test -e /tmp/plugin-upterm || rm -rf /tmp/plugin-upterm
 
 # Check architecture
+arch=$(uname -i)
 if [[ $arch == "x86_64" ]]; then
     url="https://github.com/owenthereal/upterm/releases/download/v0.7.5/upterm_linux_amd64.tar.gz"
 elif [[ $arch == "aarch64" ]]; then
