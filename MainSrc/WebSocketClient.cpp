@@ -90,7 +90,12 @@ void SendNotifyPluginCommandAcks(CWebSocketClient *ptr)
             string execState = plugin->ExecuteReceivedCommand(cmdName, params, execAck);
             cJSON *execAcks = cJSON_CreateArray();
             cJSON_AddItemToArray(execAcks, execAck);
-            char *execAcksJsonRpcString = plugin->SetNotifyCommandAcks(receivedCommand, moduleName, execState, execAcks);
+            plugin->UpdateStates(StateUpdated::ssh | StateUpdated::status | StateUpdated::version);
+            cJSON *states = cJSON_CreateArray();
+            cJSON_AddItemToArray(states, plugin->AddSshLinkState());
+            cJSON_AddItemToArray(states, plugin->AddStatusState());
+            cJSON_AddItemToArray(states, plugin->AddVersionState());
+            char *execAcksJsonRpcString = plugin->SetNotifyCommandAcks(receivedCommand, moduleName, execState, execAcks, states);
             if (execAcksJsonRpcString == NULL)
             {
                 ptr->ClearReceivedCommand();
