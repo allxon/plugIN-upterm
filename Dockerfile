@@ -39,4 +39,4 @@ RUN /usr/bin/make package
 FROM scratch AS output-stage
 ARG ARCH
 ENV ENV=${ARCH}
-COPY --from=deploy-stage /build/source/${ENV}/output/* / 	
+COPY --from=deploy-stage /build/source/${ENV}/output/* / 

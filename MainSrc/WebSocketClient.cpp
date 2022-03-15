@@ -29,7 +29,6 @@ void SendNotifyPluginStates(CWebSocketClient *ptr, bitset<4> statesUpdated)
     cJSON *states = cJSON_CreateArray();
     if ((statesUpdated & StateUpdated::version) == StateUpdated::version) cJSON_AddItemToArray(states, plugin->AddVersionState());
     if ((statesUpdated & StateUpdated::status) == StateUpdated::status) cJSON_AddItemToArray(states, plugin->AddStatusState());
-    if ((statesUpdated & StateUpdated::web) == StateUpdated::web) cJSON_AddItemToArray(states, plugin->AddWebLinkState());
     if ((statesUpdated & StateUpdated::ssh) == StateUpdated::ssh) cJSON_AddItemToArray(states, plugin->AddSshLinkState());
     char *statesNotifyString = plugin->SetNotifyStates("uptermWebConsole", states);
     ptr->SendPluginNotify(ptr, statesNotifyString);
@@ -91,7 +90,12 @@ void SendNotifyPluginCommandAcks(CWebSocketClient *ptr)
             string execState = plugin->ExecuteReceivedCommand(cmdName, params, execAck);
             cJSON *execAcks = cJSON_CreateArray();
             cJSON_AddItemToArray(execAcks, execAck);
-            char *execAcksJsonRpcString = plugin->SetNotifyCommandAcks(receivedCommand, moduleName, execState, execAcks);
+            plugin->UpdateStates(StateUpdated::ssh | StateUpdated::status | StateUpdated::version);
+            cJSON *states = cJSON_CreateArray();
+            cJSON_AddItemToArray(states, plugin->AddSshLinkState());
+            cJSON_AddItemToArray(states, plugin->AddStatusState());
+            cJSON_AddItemToArray(states, plugin->AddVersionState());
+            char *execAcksJsonRpcString = plugin->SetNotifyCommandAcks(receivedCommand, moduleName, execState, execAcks, states);
             if (execAcksJsonRpcString == NULL)
             {
                 ptr->ClearReceivedCommand();

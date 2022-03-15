@@ -18,7 +18,6 @@ class StateUpdated
 public:
     const static std::bitset<4> status;
     const static std::bitset<4> version;
-    const static std::bitset<4> web;
     const static std::bitset<4> ssh;
     const static std::bitset<4> none;
 };
@@ -37,7 +36,6 @@ class UptermStates
 public:
     const static std::string status;
     const static std::string version;
-    const static std::string web;
     const static std::string ssh;
 };
 
@@ -49,6 +47,7 @@ public:
     const static std::string stop;
     const static std::string uninstall;
     const static std::string password;
+    const static std::string server_url;
 };
 
 class CUptermPlugin : public CPluginSample
@@ -66,7 +65,6 @@ public:
     void UpdateStates(std::bitset<4> updateMask);
     cJSON *AddStatusState();
     cJSON *AddVersionState();
-    cJSON *AddWebLinkState();
     cJSON *AddSshLinkState();
     std::bitset<4> IsStateFilesChanged();
     void UpdateAlarmsData(const char *payload);
@@ -74,7 +72,6 @@ public:
     std::string m_pluginPath;
     std::string m_statusOutput;
     std::string m_versionOutput;
-    std::string m_webOutput;
     std::string m_sshOutput;
     const static std::string moduleUpterm;
 
@@ -91,7 +88,6 @@ protected:
 private:
     time_t statusTime;
     time_t versionTime;
-    time_t webTime;
     time_t sshTime;
     std::bitset<1> m_alertsStatus;
     CAlarmUpdatePluginJson *m_alarmUpdateObj;

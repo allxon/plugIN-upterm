@@ -11,20 +11,19 @@ using namespace std;
 
 const bitset<4> StateUpdated::status = bitset<4>("0001");
 const bitset<4> StateUpdated::version = bitset<4>("0010");
-const bitset<4> StateUpdated::web = bitset<4>("0100");
 const bitset<4> StateUpdated::ssh = bitset<4>("1000");
 const bitset<4> StateUpdated::none = bitset<4>("0000");
 const bitset<1> AlertStatus::alarm1 = bitset<1>("1");
 const bitset<1> AlertStatus::none = bitset<1>("0");
 const string UptermStates::status = "status";
 const string UptermStates::version = "version";
-const string UptermStates::web = "web";
 const string UptermStates::ssh = "ssh";
 const string UptermCommands::install = "install";
 const string UptermCommands::start = "start";
 const string UptermCommands::stop = "stop";
 const string UptermCommands::uninstall = "uninstall";
 const string UptermCommands::password = "password";
+const string UptermCommands::server_url = "server_url";
 const string CUptermPlugin::moduleUpterm = "uptermWebConsole";
 
 string AlertStatus::GetName(bitset<1> alertStatus)
@@ -104,12 +103,11 @@ string CUptermPlugin::ExecuteReceivedCommand(string cmdName, map<string, string>
                 string paramName = (*it).first;
                 string paramValue = (*it).second;
                 if (paramValue.empty()) continue;
-                if (paramName.compare(UptermCommands::password) == 0)
+                if (paramName.compare(UptermCommands::password) == 0 || paramName.compare(UptermCommands::server_url) == 0 )
                 {
-                    cmdParam = cmdParam.append("--").append(paramName).append("="); // set to cmdParam directly since it's the first argument.
+                    cmdParam = cmdParam.append(" ").append("--").append(paramName).append("="); 
                     cmdParam.append(paramValue);
                     UTL_LOG_INFO("cmdParam: %s", cmdParam.c_str());
-                    break;
                 }
             }
         }
@@ -153,13 +151,6 @@ void CUptermPlugin::UpdateStates(bitset<4> updateMask)
         RunStatesScript(cmdStatus);
     }
     
-    if ((updateMask & StateUpdated::web) == StateUpdated::web)
-    {
-        string cmdWeb = m_pluginPath;
-        cmdWeb.append(SCRIPTS_STATES_PATH).append(UptermStates::web).append(SCRIPT_EXT);
-        RunStatesScript(cmdWeb);
-    }
-    
     if ((updateMask & StateUpdated::ssh) == StateUpdated::ssh)
     {
         string cmdSsh = m_pluginPath;
@@ -185,12 +176,6 @@ cJSON *CUptermPlugin::AddVersionState()
 {
     string scriptFile = m_pluginPath;
     return GetStatesOutput(m_pluginPath, UptermStates::version);
-}
-
-cJSON *CUptermPlugin::AddWebLinkState()
-{
-    string scriptFile = m_pluginPath;
-    return GetStatesOutput(m_pluginPath, UptermStates::web);
 }
 
 cJSON *CUptermPlugin::AddSshLinkState()
@@ -219,15 +204,6 @@ bitset<4> CUptermPlugin::IsStateFilesChanged()
         result = result | StateUpdated::version;
 #ifdef DEBUG
         UTL_LOG_INFO("version output is updated.");
-#endif
-    }
-    int rWeb = FileIsModified(m_webOutput.c_str(), webTime, newMTime);
-    if (rWeb > 0)
-    {
-        webTime = newMTime;
-        result = result | StateUpdated::web;
-#ifdef DEBUG
-        UTL_LOG_INFO("web output is updated.");
 #endif
     }
     int rSsh = FileIsModified(m_sshOutput.c_str(), sshTime, newMTime);
@@ -282,15 +258,12 @@ void CUptermPlugin::Init()
     UTL_LOG_INFO("Init");
     statusTime = 0;
     versionTime = 0;
-    webTime = 0;
     sshTime = 0;
     m_pluginPath = string(PLUGINS_PATH).append(appGUID).append("/");
     m_statusOutput = m_pluginPath;
     m_statusOutput.append(SCRIPTS_STATES_PATH).append(UptermStates::status).append(SCRIPT_OUTPUT_EXT);
     m_versionOutput = m_pluginPath;
     m_versionOutput.append(SCRIPTS_STATES_PATH).append(UptermStates::version).append(SCRIPT_OUTPUT_EXT);
-    m_webOutput = m_pluginPath;
-    m_webOutput.append(SCRIPTS_STATES_PATH).append(UptermStates::web).append(SCRIPT_OUTPUT_EXT);
     m_sshOutput = m_pluginPath;
     m_sshOutput.append(SCRIPTS_STATES_PATH).append(UptermStates::ssh).append(SCRIPT_OUTPUT_EXT);
     m_alarmUpdateObj = NULL;
@@ -332,7 +305,7 @@ cJSON *CUptermPlugin::GetStatesOutput(string pluginPath, string stateName)
     string message = ReadOutput(scriptOutput);
     cJSON *testState = cJSON_CreateObject();
     cJSON_AddStringToObject(testState, JKEY_NAME, stateName.c_str());
-    if (stateName.compare(UptermStates::web) == 0 || stateName.compare(UptermStates::ssh) == 0)
+    if (stateName.compare(UptermStates::ssh) == 0)
     {
         UTL_LOG_INFO(message.c_str());
         cJSON_AddItemToObject(testState, JKEY_VALUE, cJSON_Parse(message.c_str()));
@@ -388,9 +361,7 @@ void CUptermPlugin::RunPluginScriptCmdOutput(string scriptCmd, string cmdParam, 
 {
     string scriptName = scriptCmd;
     if (!cmdParam.empty())
-    {
-        scriptCmd.append(" ").append(cmdParam);
-    }
+        scriptCmd.append(cmdParam);
     int status = system(scriptCmd.c_str());
     UTL_LOG_INFO("run %s command, status = %d", scriptCmd.c_str(), status);
     string scriptOutput = scriptName.substr(0, scriptName.find(SCRIPT_EXT)).append(SCRIPT_OUTPUT_EXT);
