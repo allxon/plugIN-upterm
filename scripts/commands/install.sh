@@ -4,7 +4,7 @@ exec > "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[
 
 id upterm > /dev/null 2>&1 || useradd -m upterm -s /bin/bash -g sudo 
 which apt-get > /dev/null || { echo "Not supported!"; exit 1; }
-which tmux > /dev/null && tmux -V && which upterm > /dev/null && upterm --version && exit 0;
+which tmux > /dev/null && tmux -V && which upterm > /dev/null && upterm version && exit 0;
 
 # install tmux
 apt-get update && apt-get install -y tmux

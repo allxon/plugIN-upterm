@@ -3,8 +3,7 @@
 OUTPUT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]%.*}").output"
 KNOWN_HOST="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/known_host"
 SSH_LOGIN_STATEMENT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/ssh_login_statement"
-PASSWORD=
-OPTIONS=$(getopt -l "password:" -o "p:" -a -- "$@")
+OPTIONS=$(getopt -l "password:,server_url:" -o "p:s:" -a -- "$@")
 eval set -- "$OPTIONS"
 
 while true; do
@@ -12,6 +11,10 @@ case $1 in
 -p|--password) 
     shift
     export PASSWORD=$1
+    ;;
+-s|--server_url) 
+    shift
+    export SERVER_URL=$1
     ;;
 --)
     shift
@@ -47,7 +50,7 @@ test -f ~/.ssh/id_rsa || ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa <<<y 2>&1 >
 PLUGIN_NAME=plugin_upterm
 tmux kill-session -t $PLUGIN_NAME 2>&1 > /dev/null || true
 tmux new-session -d -s $PLUGIN_NAME -n $PLUGIN_NAME 
-tmux send-keys -t $PLUGIN_NAME:$PLUGIN_NAME "upterm host --known-hosts ${KNOWN_HOST}" Enter
+tmux send-keys -t $PLUGIN_NAME:$PLUGIN_NAME "upterm host --known-hosts ${KNOWN_HOST} --server ${SERVER_URL}" Enter
 sleep 2
 tmux send-keys -t $PLUGIN_NAME:$PLUGIN_NAME "yes" Enter
 sleep 3

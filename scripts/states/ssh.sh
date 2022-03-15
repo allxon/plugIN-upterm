@@ -11,7 +11,9 @@ do
 	pidof upterm > /dev/null || { echo "{\"url\":\"\",\"alias\":\"N/A\"}"; break; }
 
 	URL=$(cat ${CURRENT_SH_DIR}/../commands/ssh_login_statement)
-	echo "{\"url\":\"${URL}\",\"alias\":\"Connect\"}"
+	WEB_URL="${URL/ssh /"ssh://"}"
+	WEB_URL="${WEB_URL/ -p /":"}"
+	echo "{\"url\":\"${WEB_URL}\",\"alias\":\"${URL}\"}"
 
 	break
 done

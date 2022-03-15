@@ -68,6 +68,14 @@
               "displayType": "string",
               "required": true,
               "defaultValue":"upterm"
+            },
+            {
+              "name": "server_url",
+              "displayName": "Server",
+              "description": "upterm server address (required), supported protocols are ssh, ws, or wss.",
+              "displayType": "string",
+              "required": true,
+              "defaultValue":"ssh://uptermd.upterm.dev:22"
             }
           ]
         },
