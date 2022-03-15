@@ -13,7 +13,17 @@ apt-get update && apt-get install -y tmux
 test -e /tmp/plugin-upterm.tar.gz || rm -rf /tmp/plugin-upterm.tar.gz
 test -e /tmp/plugin-upterm || rm -rf /tmp/plugin-upterm
 
-wget -qO /tmp/plugin-upterm.tar.gz https://github.com/owenthereal/upterm/releases/download/v0.7.5/upterm_linux_amd64.tar.gz
+# Check architecture
+if [[ $arch == "x86_64" ]]; then
+    url="https://github.com/owenthereal/upterm/releases/download/v0.7.5/upterm_linux_amd64.tar.gz"
+elif [[ $arch == "aarch64" ]]; then
+    url="https://github.com/owenthereal/upterm/releases/download/v0.7.6/upterm_linux_arm64.tar.gz"
+else
+    echo "unknown platform"
+    exit 1
+fi
+
+wget -qO /tmp/plugin-upterm.tar.gz ${url}
 mkdir /tmp/plugin-upterm && tar -xf /tmp/plugin-upterm.tar.gz -C /tmp/plugin-upterm
 cp /tmp/plugin-upterm/upterm /usr/bin/
 
