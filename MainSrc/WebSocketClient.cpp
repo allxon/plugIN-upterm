@@ -30,7 +30,7 @@ void SendNotifyPluginStates(CWebSocketClient *ptr, bitset<4> statesUpdated)
     if ((statesUpdated & StateUpdated::version) == StateUpdated::version) cJSON_AddItemToArray(states, plugin->AddVersionState());
     if ((statesUpdated & StateUpdated::status) == StateUpdated::status) cJSON_AddItemToArray(states, plugin->AddStatusState());
     if ((statesUpdated & StateUpdated::ssh) == StateUpdated::ssh) cJSON_AddItemToArray(states, plugin->AddSshLinkState());
-    char *statesNotifyString = plugin->SetNotifyStates("uptermWebConsole", states);
+    char *statesNotifyString = plugin->SetNotifyStates("upterm", states);
     ptr->SendPluginNotify(ptr, statesNotifyString);
     free(statesNotifyString);
 }

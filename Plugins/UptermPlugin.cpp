@@ -24,7 +24,7 @@ const string UptermCommands::stop = "stop";
 const string UptermCommands::uninstall = "uninstall";
 const string UptermCommands::password = "password";
 const string UptermCommands::server_url = "server_url";
-const string CUptermPlugin::moduleUpterm = "uptermWebConsole";
+const string CUptermPlugin::moduleUpterm = "upterm";
 
 string AlertStatus::GetName(bitset<1> alertStatus)
 {
