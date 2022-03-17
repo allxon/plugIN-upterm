@@ -8,7 +8,7 @@
   "stopCommand": "/opt/allxon/plugIN/e5c7f65b-1cf7-46e6-af56-d418ac43acc2/scripts/stopPlugin.sh",
   "modules": [
     {
-      "moduleName": "uptermWebConsole",
+      "moduleName": "upterm",
       "displayName": "Remote Console",
       "properties": [
         {
