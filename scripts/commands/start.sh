@@ -25,7 +25,7 @@ done
 
 if [ $UID -eq 0 ]; then
     exec > "${OUTPUT}"
-    which upterm > /dev/null || id upterm > /dev/null 2>&1 || { echo "Not installed"; exit 0; }
+    which upterm > /dev/null || id upterm > /dev/null 2>&1 || { echo "Not installed"; exit 1; }
     chown upterm:sudo "${OUTPUT}"
     echo -e "${PASSWORD:=password}\n${PASSWORD:=password}" | passwd -q upterm 2>&1
     rm -f ${KNOWN_HOST} || true 
@@ -42,7 +42,7 @@ exec >> "${OUTPUT}"
 
 # only upterm user can run
 if [ $(whoami) != "upterm" ]; then
-   echo "Permission deny"; exit 0;
+   echo "Permission deny"; exit 1;
 fi
 
 test -f ~/.ssh/id_rsa || ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa <<<y 2>&1 >/dev/null
