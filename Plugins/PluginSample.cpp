@@ -1,10 +1,11 @@
 #include "PluginSample.h"
-#include "../PluginSDK/StatesPluginJson.h"
-#include "../PluginSDK/EventsPluginJson.h"
-#include "../PluginSDK/MetricsPluginJson.h"
-#include "../PluginSDK/ConfigsPluginJson.h"
-#include "../PluginSDK/PluginException.h"
-#include "../Util/include/Utl_Log.h"
+#include "StatesPluginJson.h"
+#include "EventsPluginJson.h"
+#include "MetricsPluginJson.h"
+#include "ConfigsPluginJson.h"
+#include "PluginException.h"
+#include "Utl_Log.h"
+#include "cJSON.h"
 
 using namespace std;
 

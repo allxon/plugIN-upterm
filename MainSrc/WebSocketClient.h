@@ -3,10 +3,10 @@
 
 #include "../websocket/websocketpp/config/asio_client.hpp"
 #include "../websocket/websocketpp/client.hpp"
-#include "../Util/include/Utl_thread.h"
-#include "../Util/include/Utl_mutex.h"
-#include "../PluginSDK/BasePluginObject.h"
-#include "../PluginSDK/UpdatePluginJson.h"
+#include "Utl_thread.h"
+#include "Utl_mutex.h"
+#include "BasePluginObject.h"
+#include "UpdatePluginJson.h"
 #include "../Plugins/PluginSample.h"
 #include "Connection.h"
 

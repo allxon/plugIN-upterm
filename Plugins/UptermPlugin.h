@@ -3,7 +3,9 @@
 
 #include <bitset>
 #include "PluginSample.h"
-#include "../PluginSDK/AlertsPluginJson.h"
+#include "AlertsPluginJson.h"
+
+class cJSON;
 
 #define SAMPLE_UPTERM_PLUGIN      "UptermPlugin"
 #define PLUGINS_PATH                "/opt/allxon/plugIN/"

@@ -1,11 +1,12 @@
 #ifndef _PLUGINSAMPLE_H_
 #define _PLUGINSAMPLE_H_
 
-#include "../PluginSDK/PluginData.h"
-#include "../PluginSDK/CommandAcksPluginJson.h"
-#include "../PluginSDK/AlertsPluginJson.h"
-#include "../PluginSDK/ConfigsPluginJson.h"
+#include "PluginData.h"
+#include "CommandAcksPluginJson.h"
+#include "AlertsPluginJson.h"
+#include "ConfigsPluginJson.h"
 
+class cJSON;
 
 typedef enum
 {

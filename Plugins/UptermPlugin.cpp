@@ -1,8 +1,9 @@
 #include "UptermPlugin.h"
-#include "../Util/include/Utl_Log.h"
-#include "../PluginSDK/PluginException.h"
+#include "Utl_Log.h"
+#include "PluginException.h"
 #include <fstream>
 #include <thread>
+#include "cJSON.h"
 
 using namespace std;
 

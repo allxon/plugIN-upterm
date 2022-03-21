@@ -13,9 +13,8 @@ ARG ARCH
 ENV ENV=${ARCH:-x86}
 WORKDIR /build/source
 COPY . /build/source
-WORKDIR /build/source/linux-plugin-sdk
+WORKDIR /build/source/dep/linux-plugin-sdk
 RUN /usr/bin/make
-RUN /bin/bash -c 'cp ${ENV}/release_static/libadmplugin.a ../${ENV}/lib/'
 WORKDIR /build/source
 RUN /usr/bin/make
 
@@ -24,9 +23,8 @@ ARG ARCH
 ENV ENV=${ARCH:-jetson}
 WORKDIR /build/source
 COPY . /build/source
-WORKDIR /build/source/linux-plugin-sdk
+WORKDIR /build/source/dep/linux-plugin-sdk
 RUN /usr/bin/make toolchainbuild 
-RUN /bin/bash -c 'cp ${ENV}/release_static/libadmplugin.a ../${ENV}/lib/'
 WORKDIR /build/source
 RUN /usr/bin/make toolchainbuild 
 

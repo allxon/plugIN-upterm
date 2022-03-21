@@ -20,23 +20,25 @@ SCRIPTS_FOLDER = $(PWD)/scripts
 ENV_FOLDER = $(PWD)/$(ENV)
 OBJ_PATH = $(ENV_FOLDER)/objs
 OUTPUTPATH = $(ENV_FOLDER)/output
-LIB_FOLDER = $(ENV_FOLDER)/lib
 CONFIG_FOLDER = $(ENV_FOLDER)/config
 APPGUID_FILE := $(CONFIG_FOLDER)/appGUID
 APP_GUID := $(shell cat ${APPGUID_FILE})
 INSTALL_FOLDER = $(ENV_FOLDER)/install
 BIN_FOLDER = /opt/allxon/plugIN/$(APP_GUID)
 TMP_PKG_FOLDER = ./$(TARGET)
+PLUGIN_SDK = dep/linux-plugin-sdk
 
-CINC = -I$(MAIN_FOLDER) -I$(PWD)/websocket -I$(UTIL_FOLDER)/include -I$(PLUGINS_FOLDER)
+CINC = -I$(MAIN_FOLDER) -I$(PWD)/websocket -I$(UTIL_FOLDER)/include -I$(PLUGINS_FOLDER) \
+	-I$(PLUGIN_SDK)/include -I$(PLUGIN_SDK)/dep/cJSON/include -I$(PLUGIN_SDK)/dep/argon2/include
 SRCDIR = Util/src Plugins MainSrc
 
-CLIB = $(LIB_FOLDER)/libadmplugin.a \
-	$(LIB_FOLDER)/libargon2.a \
-	$(LIB_FOLDER)/libboost_system.a \
-	$(LIB_FOLDER)/libboost_chrono.a \
-	$(LIB_FOLDER)/libboost_random.a \
-	$(LIB_FOLDER)/libssl.a
+CLIB = $(PLUGIN_SDK)/lib/release/libadmplugin.a \
+	$(PLUGIN_SDK)/dep/argon2/lib/${ENV}/libargon2.a \
+	$(PLUGIN_SDK)/dep/cJSON/lib/${ENV}/cJSON.a \
+	${ENV}/lib/libboost_system.a \
+	$(ENV)/lib/libboost_chrono.a \
+	$(ENV)/lib/libboost_random.a \
+	$(ENV)/lib/libssl.a
 CLIB += -lrt -lcrypto -lpthread
 
 C_SRCDIR = $(SRCDIR)
