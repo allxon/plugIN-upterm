@@ -1,8 +1,8 @@
 #ifndef     _WEBSOCKETCLIENT_H_
 #define     _WEBSOCKETCLIENT_H_
 
-#include "../websocket/websocketpp/config/asio_client.hpp"
-#include "../websocket/websocketpp/client.hpp"
+#include "websocketpp/config/asio_client.hpp"
+#include "websocketpp/client.hpp"
 #include "Utl_thread.h"
 #include "Utl_mutex.h"
 #include "BasePluginObject.h"

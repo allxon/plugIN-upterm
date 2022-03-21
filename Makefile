@@ -28,7 +28,7 @@ BIN_FOLDER = /opt/allxon/plugIN/$(APP_GUID)
 TMP_PKG_FOLDER = ./$(TARGET)
 PLUGIN_SDK = dep/linux-plugin-sdk
 
-CINC = -I$(MAIN_FOLDER) -I$(PWD)/websocket -I$(UTIL_FOLDER)/include -I$(PLUGINS_FOLDER) \
+CINC = -I$(MAIN_FOLDER) -Idep/websocketpp/include -I$(UTIL_FOLDER)/include -I$(PLUGINS_FOLDER) \
 	-I$(PLUGIN_SDK)/include -I$(PLUGIN_SDK)/dep/cJSON/include -I$(PLUGIN_SDK)/dep/argon2/include
 SRCDIR = Util/src Plugins MainSrc
 
