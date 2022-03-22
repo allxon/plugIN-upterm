@@ -1,7 +1,7 @@
-#include "../include/Comm.h"
-#include "../include/Utl_mutex.h"
-#include "../include/vpl_error.h"
-#include "../include/Utl_time.h"
+#include "Comm.h"
+#include "Utl_mutex.h"
+#include "vpl_error.h"
+#include "Utl_time.h"
 
 static void privTimeoutToTimespec(const struct timespec* in, UTLTime_t timeout, struct timespec* out)
 {

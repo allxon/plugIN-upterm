@@ -1,6 +1,6 @@
-#include "../include/Utl_file.h"
-#include "../include/vpl_error.h"
-#include "../include/Comm.h"
+#include "Utl_file.h"
+#include "vpl_error.h"
+#include "Comm.h"
 #include <dirent.h>
 
 int UTLDir_Create(const char *pathname, int mode)

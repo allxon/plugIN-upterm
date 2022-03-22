@@ -3,11 +3,11 @@
 
 #include "websocketpp/config/asio_client.hpp"
 #include "websocketpp/client.hpp"
-#include "Utl_thread.h"
-#include "Utl_mutex.h"
+#include "Util/Utl_thread.h"
+#include "Util/Utl_mutex.h"
 #include "BasePluginObject.h"
 #include "UpdatePluginJson.h"
-#include "../Plugins/PluginSample.h"
+#include "PluginSample.h"
 #include "Connection.h"
 
 extern CConnection* connection;

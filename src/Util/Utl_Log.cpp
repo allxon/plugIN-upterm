@@ -1,9 +1,9 @@
-#include "../include/Comm.h"
-#include "../include/Utl_Log.h"
-#include "../include/Utl_file.h"
-#include "../include/Utl_mutex.h"
-#include "../include/Utl_thread.h"
-#include "../include/vpl_error.h"
+#include "Comm.h"
+#include "Utl_Log.h"
+#include "Utl_file.h"
+#include "Utl_mutex.h"
+#include "Utl_thread.h"
+#include "vpl_error.h"
 
 #define UTL_LOG_MAX_LINE                    256
 #define UTL_LOG_DEFAULT_PRC                 "null"

@@ -1,6 +1,6 @@
-#include "../include/Utl_thread.h"
-#include "../include/vpl_error.h"
-#include "../include/Utl_Log.h"
+#include "Utl_thread.h"
+#include "vpl_error.h"
+#include "Utl_Log.h"
 
 static const UTLThread_attr_t utlThread__default_attrs = {
     UTLTHREAD_STACKSIZE_DEFAULT,

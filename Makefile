@@ -13,7 +13,6 @@ CFLAGS = -Os -DDEBUG
 LDFLAGS = -lm
 
 TARGET = plugIN-upterm
-UTIL_FOLDER = $(PWD)/Util
 MAIN_FOLDER = $(PWD)/MainSrc
 PLUGINS_FOLDER = $(PWD)/Plugins
 SCRIPTS_FOLDER = $(PWD)/scripts
@@ -28,9 +27,9 @@ BIN_FOLDER = /opt/allxon/plugIN/$(APP_GUID)
 TMP_PKG_FOLDER = ./$(TARGET)
 PLUGIN_SDK = dep/linux-plugin-sdk
 
-CINC = -I$(MAIN_FOLDER) -Idep/websocketpp/include -I$(UTIL_FOLDER)/include -I$(PLUGINS_FOLDER) \
+SRCDIR = src
+CINC = -I$(MAIN_FOLDER) -Idep/websocketpp/include -I$(SRCDIR) -I$(PLUGINS_FOLDER) \
 	-I$(PLUGIN_SDK)/include -I$(PLUGIN_SDK)/dep/cJSON/include -I$(PLUGIN_SDK)/dep/argon2/include
-SRCDIR = Util/src Plugins MainSrc
 
 CLIB = $(PLUGIN_SDK)/lib/release/libadmplugin.a \
 	$(PLUGIN_SDK)/dep/argon2/lib/${ENV}/libargon2.a \
@@ -51,7 +50,7 @@ CPP_OBJS = $(patsubst %.cpp, $(OBJ_PATH)/%.o, $(CPP_SOURCES))
 
 ALLOBJS = $(wildcard $(OBJ_PATH)/*.o)
 
-BUILD_INFO_INCLUDE_FILE = $(PWD)/Util/include/build_info.h
+BUILD_INFO_INCLUDE_FILE = $(PWD)/src/Util/build_info.h
 BUILD_DATE := $(shell date '+%Y%m%d-%H%M%S')
 BUILD_VERSION := '1.00.2000'
 

@@ -1,5 +1,5 @@
-#include "../include/vpl_error.h"
-#include "../include/Utl_Log.h"
+#include "vpl_error.h"
+#include "Utl_Log.h"
 #include <errno.h>
 
 int VPLError_XlatErrno(int errCode)

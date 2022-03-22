@@ -105,5 +105,5 @@ After installed all dependency packages, you can build this project under the fo
 $ sudo docker build --build-arg ARCH=<x86|jetson> .
 
 # export binary to `output` folder
-$ sudo docker build -o output --build-arg ARCH=<x86|jetson> .
+$ sudo docker build -o bin --build-arg ARCH=<x86|jetson> .
 ```

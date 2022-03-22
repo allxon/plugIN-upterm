@@ -5,11 +5,11 @@
 #include "Connection.h"
 #include "ConcreteStates.h"
 #include "WebSocketClient.h"
-#include "Utl_Log.h"
+#include "Util/Utl_Log.h"
 #include "UpdatePluginJson.h"
 #include "PluginException.h"
 #include "CommandAcksPluginJson.h"
-#include "../Plugins/UptermPlugin.h"
+#include "UptermPlugin.h"
 
 using namespace std;
 

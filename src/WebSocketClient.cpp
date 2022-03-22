@@ -5,11 +5,11 @@
 #include "EventsPluginJson.h"
 #include "MetricsPluginJson.h"
 #include "LocalCommandPluginJson.h"
-#include "Utl_file.h"
-#include "Utl_Log.h"
-#include "vpl_error.h"
+#include "Util/Utl_file.h"
+#include "Util/Utl_Log.h"
+#include "Util/vpl_error.h"
 #include "ConcreteStates.h"
-#include "../Plugins/UptermPlugin.h"
+#include "UptermPlugin.h"
 #include "cJSON.h"
 
 using namespace std;
