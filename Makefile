@@ -13,8 +13,6 @@ CFLAGS = -Os -DDEBUG
 LDFLAGS = -lm
 
 TARGET = plugIN-upterm
-MAIN_FOLDER = $(PWD)/MainSrc
-PLUGINS_FOLDER = $(PWD)/Plugins
 SCRIPTS_FOLDER = $(PWD)/scripts
 ENV_FOLDER = $(PWD)/$(ENV)
 OBJ_PATH = $(ENV_FOLDER)/objs
@@ -28,17 +26,11 @@ TMP_PKG_FOLDER = ./$(TARGET)
 PLUGIN_SDK = dep/linux-plugin-sdk
 
 SRCDIR = src
-CINC = -I$(MAIN_FOLDER) -Idep/websocketpp/include -I$(SRCDIR) -I$(PLUGINS_FOLDER) \
-	-I$(PLUGIN_SDK)/include -I$(PLUGIN_SDK)/dep/cJSON/include -I$(PLUGIN_SDK)/dep/argon2/include
+CINC = -Idep/websocketpp/include -I$(SRCDIR) \
+	-I$(PLUGIN_SDK)/include -I$(PLUGIN_SDK)/dep/cJSON/include -I$(PLUGIN_SDK)/dep/phc-winner-argon2/include
 
-CLIB = $(PLUGIN_SDK)/lib/release/libadmplugin.a \
-	$(PLUGIN_SDK)/dep/argon2/lib/${ENV}/libargon2.a \
-	$(PLUGIN_SDK)/dep/cJSON/lib/${ENV}/cJSON.a \
-	${ENV}/lib/libboost_system.a \
-	$(ENV)/lib/libboost_chrono.a \
-	$(ENV)/lib/libboost_random.a \
-	$(ENV)/lib/libssl.a
-CLIB += -lrt -lcrypto -lpthread
+CLIB = $(PLUGIN_SDK)/lib/libadmplugin.a 
+CLIB += -lrt -lcrypto -lpthread -lboost_system -lboost_chrono -lboost_random -lssl
 
 C_SRCDIR = $(SRCDIR)
 C_SOURCES = $(foreach d,$(C_SRCDIR),$(wildcard $(d)/*.c))
