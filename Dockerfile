@@ -18,14 +18,14 @@ RUN apt-get update && apt-get install -y \
 FROM install-dependency AS build-stage
 ARG ARCH
 ENV ENV=${ARCH}
-COPY . /build/source
-WORKDIR /build/source/dep/linux-plugin-sdk
+COPY . /app
+WORKDIR /app/dep/linux-plugin-sdk
 RUN /usr/bin/make 
-WORKDIR /build/source
+WORKDIR /app
 RUN /usr/bin/make
 RUN /usr/bin/make package
 
 FROM scratch AS output-stage
 ARG ARCH
 ENV ENV=${ARCH}
-COPY --from=build-stage /build/source/${ENV}/output/* / 
+COPY --from=build-stage /app/plugIN-upterm.tar.gz / 

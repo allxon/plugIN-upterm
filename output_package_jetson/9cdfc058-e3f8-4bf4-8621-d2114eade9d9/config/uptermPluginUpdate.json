@@ -1,0 +1,109 @@
+{
+  "appGUID": "9cdfc058-e3f8-4bf4-8621-d2114eade9d9",
+  "appName": "AllxonuptermPlugin",
+  "displayName": "Upterm plugIN",
+  "type": "ib",
+  "version": "1.00.2000",
+  "startCommand": "/opt/allxon/plugIN/9cdfc058-e3f8-4bf4-8621-d2114eade9d9/scripts/startPlugin.sh",
+  "stopCommand": "/opt/allxon/plugIN/9cdfc058-e3f8-4bf4-8621-d2114eade9d9/scripts/stopPlugin.sh",
+  "modules": [
+    {
+      "moduleName": "upterm",
+      "displayName": "Remote Console",
+      "properties": [
+        {
+          "name": "officialSite",
+          "displayName": "Powered by",
+          "description": "",
+          "displayType": "link",
+          "value":
+          {
+            "url": "https://upterm.dev",
+            "alias": "upterm.dev"
+          }
+        },
+        {
+          "name": "license",
+          "displayName": "LICENSE",
+          "description": "",
+          "displayType": "link",
+          "value":
+          {
+            "url": "https://github.com/allxon/plugIN-upterm/blob/master/LICENSE",
+            "alias": "The 3-Clause BSD License"
+          }
+        }
+      ],
+      "states": [
+        {
+          "name": "version",
+          "displayName": "Version",
+          "description": "The software version of upterm.",
+          "displayType": "string"
+        },
+        {
+          "name": "status",
+          "displayName": "Session",
+          "description": "Running status of upterm.",
+          "displayType": "string"
+        },
+        {
+          "name": "ssh",
+          "displayName": "SSH",
+          "displayType": "link"
+        }
+      ],
+      "commands": [
+        {
+          "name": "start",
+          "type": "asynchronous",
+          "displayCategory": "Session",
+          "displayName": "Open session",
+          "description": "Open a upterm session to enable instant terminal sharing.",
+          "params": [
+            {
+              "name": "password",
+              "displayName": "Password",
+              "description": "Set a password for the user account upterm",
+              "displayType": "string",
+              "required": true,
+              "defaultValue":"upterm"
+            },
+            {
+              "name": "server_url",
+              "displayName": "Server",
+              "description": "upterm server address (required)",
+              "displayType": "string",
+              "required": true,
+              "defaultValue":"ssh://uptermd.upterm.dev:22"
+            }
+          ]
+        },
+        {
+          "name": "stop",
+          "type": "asynchronous",
+          "displayCategory": "Session",
+          "displayName": "Close session",
+          "description": "Close the upterm session to terminate terminal sharing.",
+          "params": []
+        },
+        {
+          "name": "install",
+          "type": "asynchronous",
+          "displayCategory": "Installation",
+          "displayName": "Install upterm",
+          "description": "Install upterm to be able to do instant terminal sharing.",
+          "params": []
+        },
+        {
+          "name": "uninstall",
+          "type": "asynchronous",
+          "displayCategory": "Installation",
+          "displayName": "Uninstall upterm",
+          "description": "Uninstall upterm.",
+          "params": []
+        }
+      ]
+    }
+  ]
+}
