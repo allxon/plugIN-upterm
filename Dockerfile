@@ -1,6 +1,6 @@
 ARG ARCH=${ARCH:-x86}
 
-FROM --platform=linux/amd64 ubuntu:18.04 AS x86
+FROM --platform=linux/amd64 ubuntu:20.04 AS x86
 FROM --platform=linux/arm64 nvcr.io/nvidia/l4t-base:r32.6.1 AS jetson
 
 FROM ${ARCH} AS install-dependency
