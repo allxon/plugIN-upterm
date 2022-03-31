@@ -1,0 +1,4 @@
+lib/*
+bin/*
+build_info.h
+*.tar.gz
