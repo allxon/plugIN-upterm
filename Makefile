@@ -74,6 +74,6 @@ init:
 package: $(TARGET_BINARY) $(OUTPUT_PACKAGE_SOURCE)
 	test ! -d $(TEMP_OUTPUT_PACKAGE) || rm -rf $(TEMP_OUTPUT_PACKAGE)
 	$(QUIET)cp -r $(OUTPUT_PACKAGE_SOURCE) $(TEMP_OUTPUT_PACKAGE)/
-	$(QUIET)cd $(TEMP_OUTPUT_PACKAGE); tar -czf $(PWD)/$(TARGET_NAME).tar.gz .
+	$(QUIET)cd $(TEMP_OUTPUT_PACKAGE); tar -czf $(PWD)/$(APP_GUID).tar.gz .
 	$(QUIET)rm -rf $(TEMP_OUTPUT_PACKAGE)
-	$(info The $(TARGET_NAME) app related files are packaged to ./$(TARGET_NAME).tar.gz)
+	$(info The $(TARGET_NAME) app related files are packaged to ./$(APP_GUID).tar.gz)
