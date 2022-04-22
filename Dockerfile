@@ -28,4 +28,4 @@ RUN /usr/bin/make package
 FROM scratch AS output-stage
 ARG ARCH
 ENV ENV=${ARCH}
-COPY --from=build-stage /app/plugIN-upterm.tar.gz / 
+COPY --from=build-stage /app/*.tar.gz / 
