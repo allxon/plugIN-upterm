@@ -5,10 +5,12 @@
 #include "websocketpp/client.hpp"
 #include "Util/Utl_thread.h"
 #include "Util/Utl_mutex.h"
-#include "BasePluginObject.h"
-#include "UpdatePluginJson.h"
-#include "PluginSample.h"
+// #include "BasePluginObject.h"
+// #include "UpdatePluginJson.h"
+// #include "PluginSample.h"
 #include "Connection.h"
+#include "plugin_api/np_update_json.h"
+#include "json_validator.h"
 
 extern CConnection* connection;
 extern CConnectionState* currConnState;
@@ -33,7 +35,7 @@ public:
     websocketpp::connection_hdl phd;
 };
 
-class CWebSocketClient: public CPluginUtil {
+class CWebSocketClient {
 public:
     CWebSocketClient(std::string ipaddr=IP_LOCALHOST, std::string port=AGENT_WSS_PORT);
     ~CWebSocketClient();
@@ -64,13 +66,14 @@ public:
     static void SignalHandler(int signal);
 
 #ifdef TEST_UPDATE
-    CPluginSample *GetSamplePlugin() { return m_plugin; }
-    void SetSamplePlugin(CPluginSample *plugin) { m_plugin = plugin; }
+    // CPluginSample *GetSamplePlugin() { return m_plugin; }
+    // void SetSamplePlugin(CPluginSample *plugin) { m_plugin = plugin; }
     bool SendPluginNotify(CWebSocketClient *ptr, const char *notify);
     void SendNotifyPluginUpdate();
-    CCommandPluginJson *GetReceivedCommand() { return m_receivedCommand; }
-    void SetReceivedCommand(CCommandPluginJson *receivedCommand) { m_receivedCommand = receivedCommand; }
-    void ClearReceivedCommand() { delete(m_receivedCommand); m_receivedCommand = NULL; }
+    void LoadNpUpdateTemplateFile(const std::string &path);
+    // CCommandPluginJson *GetReceivedCommand() { return m_receivedCommand; }
+    // void SetReceivedCommand(CCommandPluginJson *receivedCommand) { m_receivedCommand = receivedCommand; }
+    // void ClearReceivedCommand() { delete(m_receivedCommand); m_receivedCommand = NULL; }
 
     void ResetUpdateThreadHandle() { m_threadUpdateHandle.handle = -1; }
     pthread_t GetUpdateThreadHandle() { return m_threadUpdateHandle.handle; }
@@ -100,8 +103,8 @@ private:
     bool m_endWebSocket;
 
 #ifdef TEST_UPDATE
-    CPluginSample *m_plugin;
-    CCommandPluginJson *m_receivedCommand;
+    // CPluginSample *m_plugin;
+    // CCommandPluginJson *m_receivedCommand;
     UTLDetachableThreadHandle_t m_threadUpdateHandle;
     UTLDetachableThreadHandle_t m_threadCommandHandle;
 #endif

@@ -7,7 +7,7 @@ FROM ${ARCH} AS install-dependency
 ARG ARCH
 ENV ENV=${ARCH}
 RUN apt-get update && apt-get install -y \
-	make \
+	cmake \
 	g++ \
 	libssl-dev \
 	libboost-chrono-dev \
@@ -19,11 +19,12 @@ FROM install-dependency AS build-stage
 ARG ARCH
 ENV ENV=${ARCH}
 COPY . /app
-WORKDIR /app/dep/linux-plugin-sdk
-RUN /usr/bin/make 
 WORKDIR /app
-RUN /usr/bin/make
-RUN /usr/bin/make package
+RUN mkdir build
+WORKDIR /app/build
+RUN /usr/bin/cmake -DBUILD_FROM_SDK_SRC=ON -DARCH=${ARCH} ..
+RUN /usr/bin/cmake --build . --target package
+
 
 FROM scratch AS output-stage
 ARG ARCH

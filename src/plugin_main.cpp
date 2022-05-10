@@ -6,10 +6,11 @@
 #include "ConcreteStates.h"
 #include "WebSocketClient.h"
 #include "Util/Utl_Log.h"
-#include "UpdatePluginJson.h"
-#include "PluginException.h"
-#include "CommandAcksPluginJson.h"
-#include "UptermPlugin.h"
+// #include "UpdatePluginJson.h"
+// #include "PluginException.h"
+// #include "CommandAcksPluginJson.h"
+// #include "UptermPlugin.h"
+#include "plugin_api/np_update_json.h"
 
 using namespace std;
 
@@ -131,22 +132,23 @@ CONNECT_WEBSOCKET:
         // Init plugIN config
         if (argv[1] && strlen(argv[1]) > 0)
         {
-            CPluginSampleConfig *config = new CPluginSampleConfig(argv[1]);
-            if (config)
-            {
-                string sampleName = config->GetSampleName();
-                UTL_LOG_INFO("sample name = %s", sampleName.c_str());
-                if (sampleName.compare(SAMPLE_UPTERM_PLUGIN) == 0)
-                {
-                    CUptermPlugin *uptermPlugin = new CUptermPlugin(config);
-                    if (uptermPlugin->SetNotifyPluginUpdate()) wsclientobj->SetSamplePlugin(uptermPlugin);
-                }
-                else
-                {
-                    UTL_LOG_INFO("Unknown sample config. Terminate this plugin.");
-                    goto EXIT;
-                }
-            }
+            
+            // CPluginSampleConfig *config = new CPluginSampleConfig(argv[1]);
+            // if (config)
+            // {
+            //     string sampleName = config->GetSampleName();
+            //     UTL_LOG_INFO("sample name = %s", sampleName.c_str());
+            //     if (sampleName.compare(SAMPLE_UPTERM_PLUGIN) == 0)
+            //     {
+            //         CUptermPlugin *uptermPlugin = new CUptermPlugin(config);
+            //         if (uptermPlugin->SetNotifyPluginUpdate()) wsclientobj->SetSamplePlugin(uptermPlugin);
+            //     }
+            //     else
+            //     {
+            //         UTL_LOG_INFO("Unknown sample config. Terminate this plugin.");
+            //         goto EXIT;
+            //     }
+            // }
         }
 #endif
 #ifdef DEBUG

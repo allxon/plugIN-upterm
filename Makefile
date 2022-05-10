@@ -1,4 +1,4 @@
-QUIET = @
+# QUIET = @
 
 ifeq ($(ENV),x86)
 $(info Current ENV:$(ENV))
@@ -27,10 +27,10 @@ CPP_SOURCES = $(wildcard $(SOURCE_DIR)/*.cpp) $(wildcard $(SOURCE_DIR)/Util/*.cp
 CPP_OBJS = $(addprefix $(BUILD_DIR)/, $(patsubst %.cpp, %.o, $(CPP_SOURCES)))
 
 PLUGIN_SDK = dep/linux-plugin-sdk
-CLIB = $(PLUGIN_SDK)/lib/libadmplugin.a \
+CLIB = $(PLUGIN_SDK)/lib/libplugIN_SDK.a \
 	-lrt -lcrypto -lpthread -lboost_system -lboost_chrono -lboost_random -lssl
 CINC = -Idep/websocketpp/include -I$(SOURCE_DIR) \
-	-I$(PLUGIN_SDK)/include -I$(PLUGIN_SDK)/dep/cJSON/include -I$(PLUGIN_SDK)/dep/phc-winner-argon2/include
+	-I$(PLUGIN_SDK)/include 
 
 OUTPUT_PACKAGE_SUFFIX = _$(ENV)
 OUTPUT_PACKAGE_SOURCE = output_package$(OUTPUT_PACKAGE_SUFFIX)
@@ -75,5 +75,5 @@ package: $(TARGET_BINARY) $(OUTPUT_PACKAGE_SOURCE)
 	test ! -d $(TEMP_OUTPUT_PACKAGE) || rm -rf $(TEMP_OUTPUT_PACKAGE)
 	$(QUIET)cp -r $(OUTPUT_PACKAGE_SOURCE) $(TEMP_OUTPUT_PACKAGE)/
 	$(QUIET)cd $(TEMP_OUTPUT_PACKAGE); tar -czf $(PWD)/$(APP_GUID).tar.gz .
-	$(QUIET)rm -rf $(TEMP_OUTPUT_PACKAGE)
+	# $(QUIET)rm -rf $(TEMP_OUTPUT_PACKAGE)
 	$(info The $(TARGET_NAME) app related files are packaged to ./$(APP_GUID).tar.gz)
