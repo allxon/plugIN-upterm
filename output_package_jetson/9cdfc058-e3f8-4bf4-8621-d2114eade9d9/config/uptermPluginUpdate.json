@@ -1,11 +1,9 @@
 {
-  "appGUID": "9cdfc058-e3f8-4bf4-8621-d2114eade9d9",
-  "appName": "AllxonuptermPlugin",
+  "appGUID": "e5c7f65b-1cf7-46e6-af56-d418ac43acc2",
+  "appName": "AllxonUptermPlugin",
   "displayName": "Upterm plugIN",
   "type": "ib",
   "version": "1.00.2000",
-  "startCommand": "/opt/allxon/plugIN/9cdfc058-e3f8-4bf4-8621-d2114eade9d9/scripts/startPlugin.sh",
-  "stopCommand": "/opt/allxon/plugIN/9cdfc058-e3f8-4bf4-8621-d2114eade9d9/scripts/stopPlugin.sh",
   "modules": [
     {
       "moduleName": "upterm",

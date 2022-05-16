@@ -4,8 +4,6 @@
   "displayName": "Upterm plugIN",
   "type": "ib",
   "version": "1.00.2000",
-  "startCommand": "/opt/allxon/plugIN/e5c7f65b-1cf7-46e6-af56-d418ac43acc2/scripts/startPlugin.sh",
-  "stopCommand": "/opt/allxon/plugIN/e5c7f65b-1cf7-46e6-af56-d418ac43acc2/scripts/stopPlugin.sh",
   "modules": [
     {
       "moduleName": "upterm",
