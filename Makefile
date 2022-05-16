@@ -19,7 +19,7 @@ LDFLAGS = -lm
 
 BUILD_INFO_INCLUDE_FILE = $(PWD)/src/Util/build_info.h
 BUILD_DATE := $(shell date '+%Y%m%d-%H%M%S')
-BUILD_VERSION := '1.00.2000'
+BUILD_VERSION := '1.00.2002'
 
 BUILD_DIR = build
 SOURCE_DIR = src
