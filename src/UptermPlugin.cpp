@@ -7,8 +7,8 @@
 
 using namespace std;
 
-#define SCRIPT_EXT          ".sh"
-#define SCRIPT_OUTPUT_EXT   ".output"
+#define SCRIPT_EXT ".sh"
+#define SCRIPT_OUTPUT_EXT ".output"
 
 const bitset<4> StateUpdated::status = bitset<4>("0001");
 const bitset<4> StateUpdated::version = bitset<4>("0010");
@@ -29,27 +29,29 @@ const string CUptermPlugin::moduleUpterm = "upterm";
 
 string AlertStatus::GetName(bitset<1> alertStatus)
 {
-    if (alertStatus == AlertStatus::none) return "none";
+    if (alertStatus == AlertStatus::none)
+        return "none";
     else
     {
         string alertStatusName;
-        if ((alertStatus & AlertStatus::alarm1) == AlertStatus::alarm1) alertStatusName.append("alarm1|");
+        if ((alertStatus & AlertStatus::alarm1) == AlertStatus::alarm1)
+            alertStatusName.append("alarm1|");
         return alertStatusName;
     }
 }
 
-CUptermPlugin::CUptermPlugin():CPluginSample()
+CUptermPlugin::CUptermPlugin() : CPluginSample()
 {
     Init();
 }
 
-CUptermPlugin::CUptermPlugin(CPluginSampleConfig *sampleConfig):CPluginSample(sampleConfig)
+CUptermPlugin::CUptermPlugin(CPluginSampleConfig *sampleConfig) : CPluginSample(sampleConfig)
 {
     Init();
 }
 
 CUptermPlugin::CUptermPlugin(string apiVersion, bool minify, string appGUID, string accessKey)
-    :CPluginSample(apiVersion, minify, appGUID, accessKey)
+    : CPluginSample(apiVersion, minify, appGUID, accessKey)
 {
     Init();
 }
@@ -67,7 +69,7 @@ CUpdatePluginJson *CUptermPlugin::SetNotifyPluginUpdate()
     return updatePluginObj;
 }
 
-bool CUptermPlugin::AcceptReceivedCommand(string cmdName, map<string, string> params, string& reason)
+bool CUptermPlugin::AcceptReceivedCommand(string cmdName, map<string, string> params, string &reason)
 {
     bool result = true;
     if (!cmdName.empty())
@@ -85,7 +87,7 @@ bool CUptermPlugin::AcceptReceivedCommand(string cmdName, map<string, string> pa
         reason = "Rejected.";
     }
     UTL_LOG_INFO("reason: %s", reason.c_str());
-    return result;  
+    return result;
 }
 
 string CUptermPlugin::ExecuteReceivedCommand(string cmdName, map<string, string> params, cJSON *cmdAck)
@@ -99,14 +101,15 @@ string CUptermPlugin::ExecuteReceivedCommand(string cmdName, map<string, string>
         string cmdParam = "";
         if (cmdName.compare(UptermCommands::start) == 0)
         {
-            for (auto it=params.begin(); it!=params.end(); it++)
+            for (auto it = params.begin(); it != params.end(); it++)
             {
                 string paramName = (*it).first;
                 string paramValue = (*it).second;
-                if (paramValue.empty()) continue;
-                if (paramName.compare(UptermCommands::password) == 0 || paramName.compare(UptermCommands::server_url) == 0 )
+                if (paramValue.empty())
+                    continue;
+                if (paramName.compare(UptermCommands::password) == 0 || paramName.compare(UptermCommands::server_url) == 0)
                 {
-                    cmdParam = cmdParam.append(" ").append("--").append(paramName).append("="); 
+                    cmdParam = cmdParam.append(" ").append("--").append(paramName).append("=");
                     cmdParam.append(paramValue);
                     UTL_LOG_INFO("cmdParam: %s", cmdParam.c_str());
                 }
@@ -117,24 +120,26 @@ string CUptermPlugin::ExecuteReceivedCommand(string cmdName, map<string, string>
         thread th1 = thread(CUptermPlugin::RunPluginScriptCmdOutput, scriptCmd, cmdParam, ref(result), ref(message));
         // if (cmdName.compare(UptermCommands::start) == 0)
         // {
-            // UTL_LOG_INFO("3. start to run script");
-            // th1.detach();
-            // sleep(3);
+        // UTL_LOG_INFO("3. start to run script");
+        // th1.detach();
+        // sleep(3);
         // }
         // else
         // {
-            th1.join();
+        th1.join();
         // }
 
-        if (!cmdAck) cmdAck = cJSON_CreateObject();
+        if (!cmdAck)
+            cmdAck = cJSON_CreateObject();
         cJSON_AddStringToObject(cmdAck, JKEY_NAME, cmdName.c_str());
         cJSON_AddStringToObject(cmdAck, JKEY_RESULT, message.c_str());
-        cmdState = result? AckState::ACKED : AckState::ERRORED;
+        cmdState = result ? AckState::ACKED : AckState::ERRORED;
     }
     else
     {
         UTL_LOG_WARN("Unrecognized command.");
-        if (!cmdAck) cmdAck = cJSON_CreateObject();
+        if (!cmdAck)
+            cmdAck = cJSON_CreateObject();
         cJSON_AddStringToObject(cmdAck, JKEY_NAME, cmdName.c_str());
         cJSON_AddStringToObject(cmdAck, JKEY_RESULT, "Unrecognized command.");
         cmdState = AckState::REJECTED;
@@ -144,14 +149,14 @@ string CUptermPlugin::ExecuteReceivedCommand(string cmdName, map<string, string>
 
 void CUptermPlugin::UpdateStates(bitset<4> updateMask)
 {
-    UTL_LOG_INFO("update mask: %s", updateMask.to_string<char,string::traits_type,string::allocator_type>().c_str());
+    UTL_LOG_INFO("update mask: %s", updateMask.to_string<char, string::traits_type, string::allocator_type>().c_str());
     if ((updateMask & StateUpdated::status) == StateUpdated::status)
     {
         string cmdStatus = m_pluginPath;
         cmdStatus.append(SCRIPTS_STATES_PATH).append(UptermStates::status).append(SCRIPT_EXT);
         RunStatesScript(cmdStatus);
     }
-    
+
     if ((updateMask & StateUpdated::ssh) == StateUpdated::ssh)
     {
         string cmdSsh = m_pluginPath;
@@ -217,13 +222,14 @@ bitset<4> CUptermPlugin::IsStateFilesChanged()
 #endif
     }
 
-    UTL_LOG_INFO("result: %s", result.to_string<char,string::traits_type,string::allocator_type>().c_str());
+    UTL_LOG_INFO("result: %s", result.to_string<char, string::traits_type, string::allocator_type>().c_str());
     return result;
 }
 
 void CUptermPlugin::UpdateAlarmsData(const char *payload)
 {
-    if (payload == NULL) return;
+    if (payload == NULL)
+        return;
 
     m_alertsStatus = AlertStatus::none;
 
@@ -272,7 +278,8 @@ void CUptermPlugin::Init()
 
 string CUptermPlugin::ReadOutput(const string outputName)
 {
-    if (outputName.empty()) return "Cannot find output";
+    if (outputName.empty())
+        return "Cannot find output";
 
     string output = "";
     string str;
@@ -306,12 +313,13 @@ cJSON *CUptermPlugin::GetStatesOutput(string pluginPath, string stateName)
     string message = ReadOutput(scriptOutput);
     cJSON *testState = cJSON_CreateObject();
     cJSON_AddStringToObject(testState, JKEY_NAME, stateName.c_str());
-    if (stateName.compare(UptermStates::ssh) == 0)
-    {
-        UTL_LOG_INFO(message.c_str());
-        cJSON_AddItemToObject(testState, JKEY_VALUE, cJSON_Parse(message.c_str()));
-    }
-    else if (stateName.compare(UptermStates::version) == 0 || stateName.compare(UptermStates::status) == 0)
+    // if (stateName.compare(UptermStates::ssh) == 0)
+    // {
+    //     UTL_LOG_INFO(message.c_str());
+    //     cJSON_AddItemToObject(testState, JKEY_VALUE, cJSON_Parse(message.c_str()));
+    // }
+    if (stateName.compare(UptermStates::version) == 0 || stateName.compare(UptermStates::status) == 0 ||
+        stateName.compare(UptermStates::ssh) == 0)
     {
         cJSON_AddStringToObject(testState, JKEY_VALUE, message.c_str());
     }
@@ -404,7 +412,8 @@ void CUptermPlugin::RunPluginScriptCmdOutput(string scriptCmd, string cmdParam, 
     // UTL_LOG_INFO("Result = %s", result ? "true" : "false");
 }
 
-string CUptermPlugin::RandomString(int len) {
+string CUptermPlugin::RandomString(int len)
+{
     string s;
     static const char alphanum[] =
         "0123456789"
@@ -419,11 +428,13 @@ string CUptermPlugin::RandomString(int len) {
     return s;
 }
 
-int CUptermPlugin::FileIsModified(const char *path, time_t oldMTime, time_t &newMTime) {
+int CUptermPlugin::FileIsModified(const char *path, time_t oldMTime, time_t &newMTime)
+{
     // UTL_LOG_INFO("file: %s, oldMTime: %d", path, oldMTime);
     struct stat fileStat;
     int err = stat(path, &fileStat);
-    if (err != 0) {
+    if (err != 0)
+    {
         perror(" [file_is_modified] stat");
         exit(errno);
     }

@@ -48,7 +48,7 @@
         {
           "name": "ssh",
           "displayName": "SSH",
-          "displayType": "link"
+          "displayType": "string"
         }
       ],
       "commands": [
