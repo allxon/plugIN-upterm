@@ -14,13 +14,16 @@ SET(ARCH "x86" CACHE STRING "target archecture")
 if(NOT EXISTS "${CMAKE_SOURCE_DIR}/plugin_key_${ARCH}")
     message(FATAL_ERROR "plugin_key not found!")
 endif()
-file(STRINGS plugin_key_${ARCH} PLUGIN_KEY_CONTENT)
-string(FIND ${PLUGIN_KEY_CONTENT} "|" KEY_SEPARATE_INDEX)
-string(LENGTH ${PLUGIN_KEY_CONTENT} PLUGIN_KEY_CONTENT_SIZE)
-math(EXPR APP_GUID_LENGTH "${PLUGIN_KEY_CONTENT_SIZE} - ${KEY_SEPARATE_INDEX}")
-string(SUBSTRING ${PLUGIN_KEY_CONTENT} "0" ${APP_GUID_LENGTH} PLUGIN_APP_GUID)
-math(EXPR KEY_SEPARATE_INDEX "${KEY_SEPARATE_INDEX} + 1")
-string(SUBSTRING ${PLUGIN_KEY_CONTENT} ${KEY_SEPARATE_INDEX} -1 PLUGIN_ACCESS_KEY)
+
+execute_process (
+    COMMAND bash -c "echo $(cat plugin_key_x86) | awk -F'|' '{printf $1}'" WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    OUTPUT_VARIABLE PLUGIN_APP_GUID
+)
+
+execute_process (
+    COMMAND bash -c "echo $(cat plugin_key_x86) | awk -F'|' '{printf $2}'" WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    OUTPUT_VARIABLE PLUGIN_ACCESS_KEY
+)
 
 message("${CMAKE_PROJECT_NAME} VERSION: ${CMAKE_PROJECT_VERSION}")
 message("PLUGIN_APP_GUID: ${PLUGIN_APP_GUID}")
@@ -29,13 +32,6 @@ message("PLUGIN_ACCESS_KEY: ${PLUGIN_ACCESS_KEY}")
 configure_file(build_info.h.in build_info.h @ONLY)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-############### import libs ############### 
-# list(APPEND EXTRA_INCLUDES "${PROJECT_SOURCE_DIR}/argon2/include")
-# if(WIN32)
-#     list(APPEND EXTRA_LIBS "${PROJECT_SOURCE_DIR}/argon2/lib/Argon2OptDll.lib")
-#     list(APPEND EXTRA_BINS "${PROJECT_SOURCE_DIR}/argon2/bin/Argon2OptDll.dll")
-# endif()
-############### compile source files ############### 
 # build hello src
 aux_source_directory(${PROJECT_SOURCE_DIR}/src SOURCE_FILE)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/Util UTIL_SOURCE_FILE)
