@@ -4,7 +4,10 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/dep/linux-plugin-sdk/include",
-                "${workspaceFolder}/dep/websocketpp/include"
+                "${workspaceFolder}/dep/websocketpp/include",
+                "${workspaceFolder}/dep/linux-plugin-sdk/dep/cJSON/include",
+                "${workspaceFolder}/dep/linux-plugin-sdk/dep/phc-winner-argon2/include",
+                "${workspaceFolder}/build"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
