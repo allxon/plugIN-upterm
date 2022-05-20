@@ -3,3 +3,4 @@ bin/*
 build_info.h
 *.tar.gz
 build/*
+.vscode/*
