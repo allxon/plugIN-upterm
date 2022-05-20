@@ -4,6 +4,7 @@
 #include <csignal>
 #include "Util/Utl_Log.h"
 #include "plugin_api/np_update_json.h"
+#include "plugin_api/np_state_json.h"
 #include "json_validator.h"
 #include "build_info.h"
 
@@ -46,6 +47,7 @@ std::string getJsonFromFile(const std::string &path)
 #include "websocketpp/config/asio_client.hpp"
 #include "websocketpp/client.hpp"
 
+using namespace Allxon;
 typedef websocketpp::client<websocketpp::config::asio_tls_client> client;
 typedef websocketpp::lib::shared_ptr<websocketpp::lib::asio::ssl::context> context_ptr;
 
@@ -95,22 +97,27 @@ private:
     {
         UTL_LOG_INFO("SendNotifyPluginUpdate");
         auto output_string = m_json_validator->np_update_json().ExportToString();
-        m_json_validator->Sign(output_string);
+        if (!m_json_validator->Sign(output_string))
+        {
+            UTL_LOG_ERROR(m_json_validator->error_message().c_str());
+            return;
+        }
         m_endpoint.send(m_hdl, output_string.c_str(), websocketpp::frame::opcode::TEXT);
     }
 
     void SendPluginStatesMetrics()
     {
         UTL_LOG_INFO("SendPluginStateMetrics");
-        // std::string methodString = "v2/notifyPluginMetric";
-        // std::string outstring;
-        // Conver2SignedData(PLUGIN_AGENT_GUID, oss.str(), methodString, &outstring);
-        // m_endpoint.send(m_hdl, outstring.c_str(), websocketpp::frame::opcode::TEXT);
+        StateStateJson state_state_json("state_key", "state_value");
+        NPStateJson state_json(PLUGIN_APP_GUID, "", CMAKE_PROJECT_NAME, {state_state_json});
+        auto output_str = state_json.ExportToString();
+        if (!m_json_validator->Sign(output_str))
+        {
+            UTL_LOG_ERROR(m_json_validator->error_message().c_str());
+            return;
+        }
 
-        // methodString = "v2/notifyPluginState";
-
-        // Conver2SignedData(PLUGIN_AGENT_GUID, oss.str(), methodString, &outstring);
-        // m_endpoint.send(m_hdl, outstring.c_str(), websocketpp::frame::opcode::TEXT);
+        m_endpoint.send(m_hdl, output_str.c_str(), websocketpp::frame::opcode::TEXT);
     }
 
     bool connection_established()
@@ -133,7 +140,7 @@ private:
     std::shared_ptr<Allxon::JsonValidator> m_json_validator;
 
 public:
-    WebSocketClient(std::shared_ptr<Allxon::JsonValidator> json_validator): m_json_validator(json_validator) 
+    WebSocketClient(std::shared_ptr<Allxon::JsonValidator> json_validator) : m_json_validator(json_validator)
     {
         m_endpoint.set_reuse_addr(true);
         m_endpoint.clear_access_channels(websocketpp::log::alevel::all);
@@ -177,7 +184,7 @@ public:
             if (!connection_established())
                 continue;
 
-            if (++count == 60)
+            if (++count == 3)
             {
                 SendPluginStatesMetrics();
                 count = 0;
@@ -185,8 +192,6 @@ public:
         }
     }
 };
-
-using namespace Allxon;
 
 int main(int argc, char **argv)
 {
@@ -213,10 +218,10 @@ int main(int argc, char **argv)
     // argv[1];
     auto json_source_string = getJsonFromFile(argv[1]);
     auto json_validator = std::make_shared<JsonValidator>(CMAKE_PROJECT_NAME, PLUGIN_APP_GUID,
-                                                          PLUGIN_ACCESS_KEY, CMAKE_PROJECT_VERSION, json_source_string);
+                                                          PLUGIN_ACCESS_KEY, CMAKE_PROJECT_VERSION, 
+                                                          json_source_string);
     WebSocketClient web_client(json_validator);
     web_client.Connect("wss://127.0.0.1:55688");
     web_client.RunSendingLoop();
-    std::cout << "here" << std::endl;
     return 0;
 }

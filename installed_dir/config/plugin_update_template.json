@@ -10,7 +10,7 @@
     "version": "${PLUGIN_VERSION}",
     "modules": [
       {
-        "moduleName": "upterm",
+        "moduleName": "${PLUGIN_NAME}",
         "displayName": "Plugin SDK",
         "properties": [
           {
@@ -56,8 +56,14 @@
             }
           }
         ],
-        "states": null,
-        "commands": null, 
+        "states": [
+          {
+            "name": "state_key",
+            "displayName": "state_key",
+            "displayType": "string"
+          }
+        ],
+        "commands": null,
         "metrics": null,
         "events": null,
         "alarms": null,
