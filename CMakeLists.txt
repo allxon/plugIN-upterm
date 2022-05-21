@@ -1,33 +1,52 @@
 cmake_minimum_required(VERSION 3.10)
-message("====================== WORKING DIR : ${PROJECT_SOURCE_DIR} ======================")
-
 project(plugIN-upterm VERSION 1.00.2001)
 
 # specify the C++ standard
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-option(BUILD_FROM_SDK_SRC "Build from scratch" OFF)
-SET(ARCH "x86" CACHE STRING "target archecture")
+set(ARCH "x86" CACHE STRING "target archecture")
 
-# Parse plugin_key
-if(NOT EXISTS "${CMAKE_SOURCE_DIR}/plugin_key_${ARCH}")
-    message(FATAL_ERROR "plugin_key not found!")
+# Check and Parse plugin_key
+set(PLUGIN_KEY ${CMAKE_SOURCE_DIR}/plugin_key_${ARCH} CACHE STRING "plugIN key file")
+message("Finding ${PLUGIN_KEY}")
+if(NOT EXISTS ${PLUGIN_KEY})
+    message(FATAL_ERROR "Finding ${PLUGIN_KEY} - not found")
+else()
+    message("Finding ${PLUGIN_KEY} - found")
 endif()
-
 execute_process (
     COMMAND bash -c "echo $(cat plugin_key_x86) | awk -F'|' '{printf $1}'" WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     OUTPUT_VARIABLE PLUGIN_APP_GUID
 )
-
 execute_process (
     COMMAND bash -c "echo $(cat plugin_key_x86) | awk -F'|' '{printf $2}'" WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     OUTPUT_VARIABLE PLUGIN_ACCESS_KEY
 )
 
-message("${CMAKE_PROJECT_NAME} VERSION: ${CMAKE_PROJECT_VERSION}")
+# Check plugin package materials
+set(PLUGIN_MATERIAL_DIR ${CMAKE_SOURCE_DIR}/installed_dir)
+set(INSTALL_SH_NAME "install_plugIN.sh")
+set(PLUGIN_MATERIAL_INSTALL_SH ${PLUGIN_MATERIAL_DIR}/${INSTALL_SH_NAME}) 
+message("Finding ${PLUGIN_MATERIAL_INSTALL_SH}")
+if(NOT EXISTS ${PLUGIN_MATERIAL_INSTALL_SH})
+    message(FATAL_ERROR "Finding ${PLUGIN_MATERIAL_INSTALL_SH} - not found")
+else()
+    message("Finding ${PLUGIN_MATERIAL_INSTALL_SH} - found")
+endif()
+
+option(BUILD_FROM_SDK_SRC "Build from scratch" OFF)
+set(ROOT_INSTALL_DIR "/opt/allxon/plugIN" CACHE STRING "PlugIN install root directory")
+set(PLUGIN_INSTALL_DIR "${ROOT_INSTALL_DIR}/${PLUGIN_APP_GUID}" CACHE STRING "PlugIN install directory")
+message("=================== CMAKE_DIR : ${CMAKE_SOURCE_DIR} ======================")
+message("CMAKE_PROJECT_NAME: ${CMAKE_PROJECT_NAME}")
+message("CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+message("CMAKE_PROJECT_VERSION: ${CMAKE_PROJECT_VERSION}")
+message("*** PROJECT_DIR : ${PROJECT_SOURCE_DIR} ")
 message("PLUGIN_APP_GUID: ${PLUGIN_APP_GUID}")
 message("PLUGIN_ACCESS_KEY: ${PLUGIN_ACCESS_KEY}")
+message("PLUGIN_INSTALL_DIR: ${PLUGIN_INSTALL_DIR}")
+message("BUILD_FROM_SDK_SRC: ${BUILD_FROM_SDK_SRC}")
 
 configure_file(build_info.h.in build_info.h @ONLY)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
@@ -35,31 +54,32 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 # build hello src
 aux_source_directory(${PROJECT_SOURCE_DIR}/src SOURCE_FILE)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/Util UTIL_SOURCE_FILE)
-add_executable(plugIN-upterm ${SOURCE_FILE} ${UTIL_SOURCE_FILE})
+add_executable(${CMAKE_PROJECT_NAME} ${SOURCE_FILE} ${UTIL_SOURCE_FILE})
 
 if(BUILD_FROM_SDK_SRC)
-    #build SDK files
-    message("BUILD FROM SDK SRC")
     add_subdirectory(dep/linux-plugin-sdk)
-    add_dependencies(plugIN-upterm plugIN_SDK)
+    add_dependencies(${CMAKE_PROJECT_NAME} plugIN_SDK)
 endif()
 
 if(WIN32)
-    target_link_libraries(plugIN-upterm PUBLIC "${PROJECT_SOURCE_DIR}/dep/linux-plugin-sdk/lib/plugIN_SDK.lib")
+    target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/dep/linux-plugin-sdk/lib/plugIN_SDK.lib)
 elseif(UNIX AND NOT APPLE)
-    target_link_libraries(plugIN-upterm PUBLIC -pthread -lrt -lcrypto -lpthread -lboost_system -lboost_chrono -lboost_random -lssl
-                        "${PROJECT_SOURCE_DIR}/dep/linux-plugin-sdk/lib/libplugIN_SDK.a")
+    target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC -pthread -lrt -lcrypto -lpthread -lboost_system -lboost_chrono -lboost_random -lssl
+                        ${PROJECT_SOURCE_DIR}/dep/linux-plugin-sdk/lib/libplugIN_SDK.a)
 endif()
 
-list(APPEND EXTRA_INCLUDES "${PROJECT_SOURCE_DIR}/dep/linux-plugin-sdk/include" "${PROJECT_SOURCE_DIR}/dep/websocketpp/include") 
+list(APPEND EXTRA_INCLUDES ${PROJECT_SOURCE_DIR}/dep/linux-plugin-sdk/include ${PROJECT_SOURCE_DIR}/dep/websocketpp/include) 
 
-target_include_directories(plugIN-upterm PUBLIC 
+target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC 
                             ${EXTRA_INCLUDES}
                             )
 
 # install stage
-install(DIRECTORY installed_dir/ DESTINATION ./${PLUGIN_APP_GUID} USE_SOURCE_PERMISSIONS)
-install(PROGRAMS install_plugIN.sh DESTINATION .)
+install(DIRECTORY ${PLUGIN_MATERIAL_DIR}/ DESTINATION ./${PLUGIN_APP_GUID} 
+        FILE_PERMISSIONS OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE
+        PATTERN ${INSTALL_SH_NAME} EXCLUDE)
+install(PROGRAMS ${PLUGIN_MATERIAL_INSTALL_SH} DESTINATION .)
+install(PROGRAMS ${PROJECT_BINARY_DIR}/${CMAKE_PROJECT_NAME} DESTINATION ./${PLUGIN_APP_GUID})
 
 # package stage
 if(WIN32)

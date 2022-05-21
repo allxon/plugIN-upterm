@@ -2,6 +2,8 @@
 #include <dirent.h>
 #include <typeinfo>
 #include <csignal>
+#include <iostream>
+#include <filesystem>
 #include "Util/Utl_Log.h"
 #include "plugin_api/np_update_json.h"
 #include "plugin_api/np_state_json.h"
@@ -27,6 +29,63 @@
 
 //     return 1;
 // }
+
+std::string ReadOutput(const std::string &path)
+{
+    std::string output;
+    std::string line_str;
+    std::ifstream file(path);
+    bool is_first_line = true;
+    while (getline(file, line_str))
+    {
+        if (is_first_line)
+            is_first_line = false;
+        else
+            output.append("\n");
+        output.append(line_str);
+    }
+
+    return output;
+}
+
+bool RunCommand(const std::string &command)
+{
+    int status = system(command.c_str());
+    UTL_LOG_INFO("run: %s, status = %x", command.c_str(), status);
+    if (status < 0)
+        return false;
+    else
+    {
+        if (WIFEXITED(status))
+        {
+            int wexitstatus = WEXITSTATUS(status);
+            if (0 == wexitstatus)
+            {
+                UTL_LOG_INFO("Program returned normally, exit code %d", wexitstatus);
+                return true;
+            }
+            else
+            {
+                UTL_LOG_INFO("Run command fail, script exit code: %d\n", wexitstatus);
+                return false;
+            }
+        }
+        else
+        {
+            UTL_LOG_INFO("Program exited by signal.");
+            return false;
+        }
+    }
+}
+
+bool RunPluginScript(const std::string &relative_path, std::string &output)
+{
+    auto plugin_install_dir = std::string(PLUGIN_INSTALL_DIR);
+    auto result = RunCommand(plugin_install_dir + "/" + relative_path);
+    auto output_path = relative_path.substr(0, relative_path.find("sh")).append("output");
+    output = ReadOutput(plugin_install_dir +"/" + output_path);
+    return result;
+}
 
 std::string getJsonFromFile(const std::string &path)
 {
@@ -92,6 +151,7 @@ private:
     void OnMessage(websocketpp::connection_hdl hdl, client::message_ptr msg)
     {
         UTL_LOG_INFO("OnMessage");
+        UTL_LOG_INFO(msg->get_payload().c_str());
     }
     void SendNotifyPluginUpdate()
     {
@@ -108,7 +168,10 @@ private:
     void SendPluginStatesMetrics()
     {
         UTL_LOG_INFO("SendPluginStateMetrics");
-        StateStateJson state_state_json("state_key", "state_value");
+        std::string state_value;
+        if (!RunPluginScript("scripts/states/state_key.sh", state_value))
+            state_value = "N/A";
+        StateStateJson state_state_json("state_key", state_value);
         NPStateJson state_json(PLUGIN_APP_GUID, "", CMAKE_PROJECT_NAME, {state_state_json});
         auto output_str = state_json.ExportToString();
         if (!m_json_validator->Sign(output_str))
@@ -218,7 +281,7 @@ int main(int argc, char **argv)
     // argv[1];
     auto json_source_string = getJsonFromFile(argv[1]);
     auto json_validator = std::make_shared<JsonValidator>(CMAKE_PROJECT_NAME, PLUGIN_APP_GUID,
-                                                          PLUGIN_ACCESS_KEY, CMAKE_PROJECT_VERSION, 
+                                                          PLUGIN_ACCESS_KEY, CMAKE_PROJECT_VERSION,
                                                           json_source_string);
     WebSocketClient web_client(json_validator);
     web_client.Connect("wss://127.0.0.1:55688");
