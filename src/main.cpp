@@ -1,12 +1,11 @@
 #include "Log.h"
-#include <dirent.h>
-#include <typeinfo>
-#include <csignal>
 #include <iostream>
 #include <filesystem>
 #include "Util/Utl_Log.h"
 #include "plugin_api/np_update_json.h"
 #include "plugin_api/np_state_json.h"
+#include "plugin_api/np_command_json.h"
+#include "plugin_api/np_command_ack_json.h"
 #include "json_validator.h"
 #include "build_info.h"
 
@@ -83,7 +82,7 @@ bool RunPluginScript(const std::string &relative_path, std::string &output)
     auto plugin_install_dir = std::string(PLUGIN_INSTALL_DIR);
     auto result = RunCommand(plugin_install_dir + "/" + relative_path);
     auto output_path = relative_path.substr(0, relative_path.find("sh")).append("output");
-    output = ReadOutput(plugin_install_dir +"/" + output_path);
+    output = ReadOutput(plugin_install_dir + "/" + output_path);
     return result;
 }
 
@@ -150,8 +149,52 @@ private:
     }
     void OnMessage(websocketpp::connection_hdl hdl, client::message_ptr msg)
     {
+        const auto payload = msg->get_payload();
         UTL_LOG_INFO("OnMessage");
-        UTL_LOG_INFO(msg->get_payload().c_str());
+        UTL_LOG_INFO(payload.c_str());
+        if (!m_json_validator->Verify(payload))
+        {
+            UTL_LOG_ERROR("OnMessage payload verify failed");
+            return;
+        }
+        PluginAPI plugin_api;
+        plugin_api.ImportFromString(payload);
+        if (plugin_api.method() == "v2/notifyPluginCommand")
+        {
+            NPCommandJson np_cmd_json;
+            np_cmd_json.ImportFromString(payload);
+            UTL_LOG_INFO("get command id: %s", np_cmd_json.command_id().c_str());
+
+            auto commands = np_cmd_json.commands_json();
+            std::vector<CommandAckCmdAckJson> cmds_ack;
+            for (const auto &cmd : commands)
+            {
+                cmds_ack.push_back({cmd.name()});
+            }
+            NPCommandAckJson np_cmd_accept_json(PLUGIN_APP_GUID, "", np_cmd_json.command_id(),
+                                                np_cmd_json.command_source(), np_cmd_json.module_name(),
+                                                Allxon::NPCommandAckJson::CommandState::ACCEPTED,
+                                                cmds_ack);
+            PushCommandQueue(m_cmd_accept_queue, np_cmd_accept_json);
+
+            std::vector<CommandAckCmdAckJson> cmds_accept;
+            for (const auto &cmd : commands)
+            {
+                std::string cmd_output;
+                bool cmd_result = RunPluginScript("scripts/commands/" + cmd.name() + ".sh", cmd_output);
+                cmds_accept.push_back({cmd.name()});
+            }
+
+            NPCommandAckJson np_cmd_ack_json(PLUGIN_APP_GUID, "", np_cmd_json.command_id(),
+                                             np_cmd_json.command_source(), np_cmd_json.module_name(),
+                                             Allxon::NPCommandAckJson::CommandState::ACKED,
+                                             cmds_ack);
+            PushCommandQueue(m_cmd_ack_queue, np_cmd_ack_json);
+        }
+        else
+        {
+            UTL_LOG_ERROR("OnMessage payload unknown method");
+        }
     }
     void SendNotifyPluginUpdate()
     {
@@ -183,6 +226,25 @@ private:
         m_endpoint.send(m_hdl, output_str.c_str(), websocketpp::frame::opcode::TEXT);
     }
 
+    void SendPluginCommandAck(std::queue<Allxon::NPCommandAckJson> &queue)
+    {
+        if (queue.empty())
+            return;
+        UTL_LOG_INFO("SendPluginCommandAck");
+        NPCommandAckJson np_cmd_ack_json;
+        while (PopCommandQueue(queue, np_cmd_ack_json))
+        {
+            auto output_str = np_cmd_ack_json.ExportToString();
+            if (!m_json_validator->Sign(output_str))
+            {
+                UTL_LOG_ERROR(m_json_validator->error_message().c_str());
+                return;
+            }
+
+            m_endpoint.send(m_hdl, output_str.c_str(), websocketpp::frame::opcode::TEXT);
+        }
+    }
+
     bool connection_established()
     {
         std::lock_guard<std::mutex> lock(m_mutex);
@@ -194,6 +256,22 @@ private:
         m_connection_established = value;
     }
 
+    void PushCommandQueue(std::queue<Allxon::NPCommandAckJson> &queue, const Allxon::NPCommandAckJson &command)
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        queue.push(command);
+    }
+
+    bool PopCommandQueue(std::queue<Allxon::NPCommandAckJson> &queue, Allxon::NPCommandAckJson &pop_command)
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        if (queue.empty())
+            return false;
+        pop_command = queue.front();
+        queue.pop();
+        return true;
+    }
+
     client m_endpoint;
     websocketpp::connection_hdl m_hdl;
     std::mutex m_mutex;
@@ -201,6 +279,8 @@ private:
     websocketpp::lib::shared_ptr<std::thread> m_send_thread;
     bool m_connection_established = false;
     std::shared_ptr<Allxon::JsonValidator> m_json_validator;
+    std::queue<Allxon::NPCommandAckJson> m_cmd_accept_queue;
+    std::queue<Allxon::NPCommandAckJson> m_cmd_ack_queue;
 
 public:
     WebSocketClient(std::shared_ptr<Allxon::JsonValidator> json_validator) : m_json_validator(json_validator)
@@ -247,7 +327,9 @@ public:
             if (!connection_established())
                 continue;
 
-            if (++count == 3)
+            SendPluginCommandAck(m_cmd_accept_queue);
+            SendPluginCommandAck(m_cmd_ack_queue);
+            if (++count == 60)
             {
                 SendPluginStatesMetrics();
                 count = 0;

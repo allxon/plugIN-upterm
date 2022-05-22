@@ -63,7 +63,32 @@
             "displayType": "string"
           }
         ],
-        "commands": null,
+        "commands": [
+          {
+            "name": "command_key",
+            "displayName": "command_key",
+            "type": "asynchronous",
+            "params": [
+              {
+                "name": "command_param_key",
+                "displayType": "string",
+                "required": "true"
+              }
+            ]
+          },
+          {
+            "name": "state_key",
+            "displayName": "state_key",
+            "type": "asynchronous",
+            "params": [
+              {
+                "name": "command_param_key_x",
+                "displayType": "string",
+                "required": "true"
+              }
+            ]
+          }
+        ],
         "metrics": null,
         "events": null,
         "alarms": null,
