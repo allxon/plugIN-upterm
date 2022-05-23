@@ -10,9 +10,6 @@ RUN apt-get update && apt-get install -y \
 	cmake \
 	g++ \
 	libssl-dev \
-	libboost-chrono-dev \
-	libboost-random-dev \
-	libboost-system-dev \
 	&& rm -rf /var/lib/apt/lists/*
 
 FROM install-dependency AS build-stage

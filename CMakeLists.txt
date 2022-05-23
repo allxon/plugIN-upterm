@@ -58,17 +58,19 @@ add_executable(${CMAKE_PROJECT_NAME} ${SOURCE_FILE} ${UTIL_SOURCE_FILE})
 
 if(BUILD_FROM_SDK_SRC)
     add_subdirectory(dep/linux-plugin-sdk)
-    add_dependencies(${CMAKE_PROJECT_NAME} plugIN_SDK)
+    add_dependencies(${CMAKE_PROJECT_NAME} plugIN_SDK) 
 endif()
 
 if(WIN32)
     target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/dep/linux-plugin-sdk/lib/plugIN_SDK.lib)
 elseif(UNIX AND NOT APPLE)
-    target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC -pthread -lrt -lcrypto -lpthread -lboost_system -lboost_chrono -lboost_random -lssl
+    target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC -pthread -lrt -lcrypto -lssl
                         ${PROJECT_SOURCE_DIR}/dep/linux-plugin-sdk/lib/libplugIN_SDK.a)
 endif()
 
-list(APPEND EXTRA_INCLUDES ${PROJECT_SOURCE_DIR}/dep/linux-plugin-sdk/include ${PROJECT_SOURCE_DIR}/dep/websocketpp/include) 
+list(APPEND EXTRA_INCLUDES ${PROJECT_SOURCE_DIR}/dep/linux-plugin-sdk/include 
+                           ${PROJECT_SOURCE_DIR}/dep/websocketpp
+                           ${PROJECT_SOURCE_DIR}/dep/asio/asio/include) 
 
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC 
                             ${EXTRA_INCLUDES}

@@ -1,6 +1,5 @@
 #include "Log.h"
 #include <iostream>
-#include <filesystem>
 #include "Util/Utl_Log.h"
 #include "plugin_api/np_update_json.h"
 #include "plugin_api/np_state_json.h"
@@ -9,6 +8,7 @@
 #include "json_validator.h"
 #include "build_info.h"
 
+#define ASIO_STANDALONE
 // int getLock(void)
 // {
 //     struct flock fl;
@@ -115,14 +115,14 @@ private:
     context_ptr OnTLSInit(websocketpp::connection_hdl hdl)
     {
         UTL_LOG_INFO("OnTLSInit");
-        context_ptr ctx = websocketpp::lib::make_shared<boost::asio::ssl::context>(boost::asio::ssl::context::tlsv12);
+        context_ptr ctx = websocketpp::lib::make_shared<asio::ssl::context>(asio::ssl::context::tlsv12);
 
-        ctx->set_options(boost::asio::ssl::context::default_workarounds |
-                         boost::asio::ssl::context::no_sslv2 |
-                         boost::asio::ssl::context::no_sslv3 |
-                         boost::asio::ssl::context::single_dh_use);
+        ctx->set_options(asio::ssl::context::default_workarounds |
+                         asio::ssl::context::no_sslv2 |
+                         asio::ssl::context::no_sslv3 |
+                         asio::ssl::context::single_dh_use);
 
-        ctx->set_verify_mode(boost::asio::ssl::verify_none);
+        ctx->set_verify_mode(asio::ssl::verify_none);
         return ctx;
     }
 
