@@ -166,23 +166,23 @@ private:
             UTL_LOG_INFO("get command id: %s", np_cmd_json.command_id().c_str());
 
             auto commands = np_cmd_json.commands_json();
-            std::vector<CommandAckCmdAckJson> cmds_ack;
+            std::vector<CommandAckCmdAckJson> cmds_accept;
             for (const auto &cmd : commands)
             {
-                cmds_ack.push_back({cmd.name()});
+                cmds_accept.push_back({cmd.name()});
             }
             NPCommandAckJson np_cmd_accept_json(PLUGIN_APP_GUID, "", np_cmd_json.command_id(),
                                                 np_cmd_json.command_source(), np_cmd_json.module_name(),
                                                 Allxon::NPCommandAckJson::CommandState::ACCEPTED,
-                                                cmds_ack);
+                                                cmds_accept);
             PushCommandQueue(m_cmd_accept_queue, np_cmd_accept_json);
 
-            std::vector<CommandAckCmdAckJson> cmds_accept;
+            std::vector<CommandAckCmdAckJson> cmds_ack;
             for (const auto &cmd : commands)
             {
                 std::string cmd_output;
                 bool cmd_result = RunPluginScript("scripts/commands/" + cmd.name() + ".sh", cmd_output);
-                cmds_accept.push_back({cmd.name()});
+                cmds_ack.push_back({cmd.name(), cmd_output});
             }
 
             NPCommandAckJson np_cmd_ack_json(PLUGIN_APP_GUID, "", np_cmd_json.command_id(),
@@ -214,8 +214,8 @@ private:
         std::string state_value;
         if (!RunPluginScript("scripts/states/state_key.sh", state_value))
             state_value = "N/A";
-        StateStateJson state_state_json("state_key", state_value);
-        NPStateJson state_json(PLUGIN_APP_GUID, "", CMAKE_PROJECT_NAME, {state_state_json});
+        ValueParamJson value_param_json("state_key", state_value);
+        NPStateJson state_json(PLUGIN_APP_GUID, "", CMAKE_PROJECT_NAME, {value_param_json});
         auto output_str = state_json.ExportToString();
         if (!m_json_validator->Sign(output_str))
         {
