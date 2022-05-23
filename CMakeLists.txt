@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(ARCH "x86" CACHE STRING "target archecture")
 
 # Check and Parse plugin_key
-set(PLUGIN_KEY ${CMAKE_SOURCE_DIR}/plugin_key_${ARCH} CACHE STRING "plugIN key file")
+set(PLUGIN_KEY ${CMAKE_SOURCE_DIR}/plugin_key_${ARCH}.txt CACHE STRING "plugIN key file")
 message("Finding ${PLUGIN_KEY}")
 if(NOT EXISTS ${PLUGIN_KEY})
     message(FATAL_ERROR "Finding ${PLUGIN_KEY} - not found")
@@ -16,11 +16,11 @@ else()
     message("Finding ${PLUGIN_KEY} - found")
 endif()
 execute_process (
-    COMMAND bash -c "echo $(cat plugin_key_x86) | awk -F'|' '{printf $1}'" WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    COMMAND bash -c "echo $(cat ${PLUGIN_KEY}) | awk -F'|' '{printf $1}'" WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     OUTPUT_VARIABLE PLUGIN_APP_GUID
 )
 execute_process (
-    COMMAND bash -c "echo $(cat plugin_key_x86) | awk -F'|' '{printf $2}'" WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    COMMAND bash -c "echo $(cat ${PLUGIN_KEY}) | awk -F'|' '{printf $2}'" WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     OUTPUT_VARIABLE PLUGIN_ACCESS_KEY
 )
 
