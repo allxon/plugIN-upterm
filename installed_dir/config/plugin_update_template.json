@@ -82,28 +82,53 @@
         ],
         "commands": [
           {
-            "name": "command_key",
-            "displayName": "command_key",
+            "name": "start",
             "type": "asynchronous",
+            "displayCategory": "Session",
+            "displayName": "Open session",
+            "description": "Open a upterm session to enable instant terminal sharing.",
             "params": [
               {
-                "name": "command_param_key",
+                "name": "password",
+                "displayName": "Password",
+                "description": "Set a password for the user account upterm",
                 "displayType": "string",
-                "required": "true"
+                "required": true,
+                "defaultValue": "upterm"
+              },
+              {
+                "name": "server_url",
+                "displayName": "Server",
+                "description": "upterm server address (required)",
+                "displayType": "string",
+                "required": true,
+                "defaultValue": "ssh://uptermd.upterm.dev:22"
               }
             ]
           },
           {
-            "name": "state_key",
-            "displayName": "state_key",
+            "name": "stop",
             "type": "asynchronous",
-            "params": [
-              {
-                "name": "command_param_key_x",
-                "displayType": "string",
-                "required": "true"
-              }
-            ]
+            "displayCategory": "Session",
+            "displayName": "Close session",
+            "description": "Close the upterm session to terminate terminal sharing.",
+            "params": []
+          },
+          {
+            "name": "install",
+            "type": "asynchronous",
+            "displayCategory": "Installation",
+            "displayName": "Install upterm",
+            "description": "Install upterm to be able to do instant terminal sharing.",
+            "params": []
+          },
+          {
+            "name": "uninstall",
+            "type": "asynchronous",
+            "displayCategory": "Installation",
+            "displayName": "Uninstall upterm",
+            "description": "Uninstall upterm.",
+            "params": []
           }
         ],
         "metrics": null,

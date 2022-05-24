@@ -165,9 +165,9 @@ private:
             np_cmd_json.ImportFromString(payload);
             UTL_LOG_INFO("get command id: %s", np_cmd_json.command_id().c_str());
 
-            auto commands = np_cmd_json.commands_json();
+            auto receive_commands = np_cmd_json.commands_json();
             std::vector<CommandAckCmdAckJson> cmds_accept;
-            for (const auto &cmd : commands)
+            for (const auto &cmd : receive_commands)
             {
                 cmds_accept.push_back({cmd.name()});
             }
@@ -177,12 +177,30 @@ private:
                                                 cmds_accept);
             PushCommandQueue(m_cmd_accept_queue, np_cmd_accept_json);
 
+            const auto &np_update_commands = m_json_validator->np_update_json().modules_json().front().commands_json();
             std::vector<CommandAckCmdAckJson> cmds_ack;
-            for (const auto &cmd : commands)
+            for (const auto &receive_cmd : receive_commands)
             {
+                auto match_cmd = std::find_if(std::begin(np_update_commands), std::end(np_update_commands), [&](const UpdateCommandJson &update_cmd)
+                                              { return update_cmd.name() == receive_cmd.name(); });
+                if (match_cmd == std::end(np_update_commands))
+                {
+                    UTL_LOG_WARN("can't find matched cmd");
+                    return;
+                }
+
+                if ((*match_cmd).name() == "start")
+                {
+                    
+                }
+
                 std::string cmd_output;
-                bool cmd_result = RunPluginScript("scripts/commands/" + cmd.name() + ".sh", cmd_output);
-                cmds_ack.push_back({cmd.name(), cmd_output});
+                bool cmd_result = RunPluginScript("scripts/commands/" + receive_cmd.name() + ".sh", cmd_output);
+                cmds_ack.push_back({receive_cmd.name(), cmd_output});
+
+                // const auto &params = cmd.params_json();
+                // auto result = std::find_if(std::begin(params), std::end(params), [&](const ValueParamJson &param)
+                //    { return module.module_name() == np_state->module_name(); });
             }
 
             NPCommandAckJson np_cmd_ack_json(PLUGIN_APP_GUID, "", np_cmd_json.command_id(),
