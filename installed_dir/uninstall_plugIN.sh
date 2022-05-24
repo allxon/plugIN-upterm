@@ -1,7 +1,11 @@
 #!/bin/bash
+# set -e
+# set -x 
 
-echo "Stop running plugIN-upterm."
-currentShDirectory=$(dirname ${BASH_SOURCE})
-$currentShDirectory/scripts/commands/uninstall.sh
-$currentShDirectory/scripts/stopPlugin.sh
-rm -rf $currentShDirectory
+COMMAND_UNINSTALL_RELATIVE_PATH=scripts/commands/uninstall.sh
+STOP_PLUGIN_RELATIVE_PATH=scripts/stopPlugin.sh
+
+CURRENT_SH_DIRECTORY=$(cd "$(dirname "${BASH_SOURCE[0]}")/" && pwd)
+$CURRENT_SH_DIRECTORY/$COMMAND_UNINSTALL_RELATIVE_PATH
+$CURRENT_SH_DIRECTORY/$STOP_PLUGIN_RELATIVE_PATH
+rm -rf $CURRENT_SH_DIRECTORY

@@ -1,34 +1,31 @@
 #!/bin/bash
+# set -e
+# set -x 
 
-currentShDirectory=$(cd "$(dirname "${BASH_SOURCE[0]}")/../" && pwd)
-plugin_appguid=$(ls -d $currentShDirectory/*) 
-plugin_folder=plugIN-upterm
+PLUGIN_NAME=plugIN-upterm
+START_PLUGIN_RELATIVE_PATH=scripts/startPlugin.sh
 
-sudo mkdir -p $ALLXON_PLUGIN_DIR
+CURRENT_SH_DIRECTORY=$(cd "$(dirname "${BASH_SOURCE[0]}")/" && pwd)
+PLUGIN_APP_GUID=${ALLXON_PLUGIN_DIR##*/}
 
-output_file="install_plugIN_$plugin_appguid.output"
+if [ -d $ALLXON_PLUGIN_DIR ]; then
+   echo "ERROR: plugin $PLUGIN_APP_GUID already installed"
+   exit 1
+else 
+   mkdir -p $ALLXON_PLUGIN_DIR
+fi 
 
-# If users try to install this plugIN on non-Ubuntu x86 devices, then it will be returned
-if [ -r /etc/os-release ]; then
-    lsb_dist="$(. /etc/os-release && echo "$ID")"
-    if [ ! "$lsb_dist" == "ubuntu" ]; then
-       sudo echo "Not Supported Distribution" > $output_file 2>&1
-       sudo cp $output_file $ALLXON_PLUGIN_DIR/
-       sudo rm $output_file
-       exit 1
-    fi
-fi
+output_file="install_plugIN_$PLUGIN_APP_GUID.output"
 
-arch=$(dpkg --print-architecture)
-if [ ! "$arch" == "amd64" ] && [ ! "$arch" == "i386" ]; then
-   sudo echo "Not Supported Architecture" > $output_file 2>&1
-   sudo cp $output_file $ALLXON_PLUGIN_DIR/
-   sudo rm $output_file
+EXECUTABLE_DESCRIPTION=$(file $CURRENT_SH_DIRECTORY/$PLUGIN_APP_GUID/$PLUGIN_NAME)
+ARCH=$(uname -i)
+if [[ "$EXECUTABLE_DESCRIPTION" != *"$ARCH"* ]]; then
+   echo "Not Supported Architecture" > $output_file 2>&1
    exit 1
 fi
 
-sudo cp -r $currentShDirectory/$plugin_appguid/* $ALLXON_PLUGIN_DIR
+cp -r $CURRENT_SH_DIRECTORY/$PLUGIN_APP_GUID/* $ALLXON_PLUGIN_DIR
 
 echo "plugIN is installed to $ALLXON_PLUGIN_DIR/"
 
-sudo $ALLXON_PLUGIN_DIR/scripts/startPlugin.sh
+$ALLXON_PLUGIN_DIR/$START_PLUGIN_RELATIVE_PATH
