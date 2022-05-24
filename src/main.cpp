@@ -211,11 +211,18 @@ private:
     void SendPluginStatesMetrics()
     {
         UTL_LOG_INFO("SendPluginStateMetrics");
-        std::string state_value;
-        if (!RunPluginScript("scripts/states/state_key.sh", state_value))
-            state_value = "N/A";
-        ValueParamJson value_param_json("state_key", state_value);
-        NPStateJson state_json(PLUGIN_APP_GUID, "", PLUGIN_NAME, {value_param_json});
+        const auto &states = m_json_validator->np_update_json().modules_json().front().states_json();
+
+        std::vector<ValueParamJson> value_params_json;
+        for (const auto &state : states)
+        {
+            std::string value_output;
+            if (!RunPluginScript("scripts/states/" + state.name() + ".sh", value_output))
+                value_output = "N/A";
+            value_params_json.push_back({state.name(), value_output});
+        }
+
+        NPStateJson state_json(PLUGIN_APP_GUID, "", PLUGIN_NAME, value_params_json);
         auto output_str = state_json.ExportToString();
         if (!m_json_validator->Sign(output_str))
         {

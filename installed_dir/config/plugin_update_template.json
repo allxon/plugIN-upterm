@@ -61,6 +61,23 @@
             "name": "state_key",
             "displayName": "state_key",
             "displayType": "string"
+          },
+          {
+            "name": "version",
+            "displayName": "Version",
+            "description": "The software version of upterm.",
+            "displayType": "string"
+          },
+          {
+            "name": "status",
+            "displayName": "Session",
+            "description": "Running status of upterm.",
+            "displayType": "string"
+          },
+          {
+            "name": "ssh",
+            "displayName": "SSH",
+            "displayType": "string"
           }
         ],
         "commands": [
