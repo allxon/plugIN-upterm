@@ -1,6 +1,6 @@
 #!/bin/bash
 
-plugin_appguid=e5c7f65b-1cf7-46e6-af56-d418ac43acc2
+plugin_appguid=9cdfc058-e3f8-4bf4-8621-d2114eade9d9
 plugin_service=plugIN-upterm.service
 output_file="install_plugIN_$plugin_appguid.output"
 sudo mkdir -p $ALLXON_PLUGIN_DIR
