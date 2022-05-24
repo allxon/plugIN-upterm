@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.23)
 project(plugIN-upterm VERSION 1.00.2001)
 
 # specify the C++ standard
@@ -35,18 +35,23 @@ else()
     message("Finding ${PLUGIN_MATERIAL_INSTALL_SH} - found")
 endif()
 
+
 option(BUILD_FROM_SDK_SRC "Build from scratch" OFF)
 set(ROOT_INSTALL_DIR "/opt/allxon/plugIN" CACHE STRING "PlugIN install root directory")
 set(PLUGIN_INSTALL_DIR "${ROOT_INSTALL_DIR}/${PLUGIN_APP_GUID}" CACHE STRING "PlugIN install directory")
+set(PLUGIN_NAME ${CMAKE_PROJECT_NAME})
+set(PLUGIN_VERSION ${PROJECT_VERSION})
 message("=================== CMAKE_DIR : ${CMAKE_SOURCE_DIR} ======================")
-message("CMAKE_PROJECT_NAME: ${CMAKE_PROJECT_NAME}")
+message("PLUGIN_NAME: ${PLUGIN_NAME}")
+message("PLUGIN_VERSION: ${PLUGIN_VERSION}")
 message("CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
-message("CMAKE_PROJECT_VERSION: ${CMAKE_PROJECT_VERSION}")
 message("*** PROJECT_DIR : ${PROJECT_SOURCE_DIR} ")
 message("PLUGIN_APP_GUID: ${PLUGIN_APP_GUID}")
 message("PLUGIN_ACCESS_KEY: ${PLUGIN_ACCESS_KEY}")
 message("PLUGIN_INSTALL_DIR: ${PLUGIN_INSTALL_DIR}")
 message("BUILD_FROM_SDK_SRC: ${BUILD_FROM_SDK_SRC}")
+
+file(MAKE_DIRECTORY ${ROOT_INSTALL_DIR})
 
 configure_file(build_info.h.in build_info.h @ONLY)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})

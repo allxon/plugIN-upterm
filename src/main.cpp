@@ -215,7 +215,7 @@ private:
         if (!RunPluginScript("scripts/states/state_key.sh", state_value))
             state_value = "N/A";
         ValueParamJson value_param_json("state_key", state_value);
-        NPStateJson state_json(PLUGIN_APP_GUID, "", CMAKE_PROJECT_NAME, {value_param_json});
+        NPStateJson state_json(PLUGIN_APP_GUID, "", PLUGIN_NAME, {value_param_json});
         auto output_str = state_json.ExportToString();
         if (!m_json_validator->Sign(output_str))
         {
@@ -341,7 +341,7 @@ public:
 int main(int argc, char **argv)
 {
     Log start; // start Logging
-    UTL_LOG_INFO("BUILD_INFO: %s", BUILD_INFO);
+    UTL_LOG_INFO("PLUGIN_VERSION: %s", PLUGIN_VERSION);
 
     // if (!getLock()) // Check single instance app
     // {
@@ -362,8 +362,8 @@ int main(int argc, char **argv)
     }
     // argv[1];
     auto json_source_string = getJsonFromFile(argv[1]);
-    auto json_validator = std::make_shared<JsonValidator>(CMAKE_PROJECT_NAME, PLUGIN_APP_GUID,
-                                                          PLUGIN_ACCESS_KEY, CMAKE_PROJECT_VERSION,
+    auto json_validator = std::make_shared<JsonValidator>(PLUGIN_NAME, PLUGIN_APP_GUID,
+                                                          PLUGIN_ACCESS_KEY, PLUGIN_VERSION,
                                                           json_source_string);
     WebSocketClient web_client(json_validator);
     web_client.Connect("wss://127.0.0.1:55688");
