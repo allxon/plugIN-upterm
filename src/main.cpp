@@ -9,6 +9,9 @@
 #include "build_info.h"
 
 #define ASIO_STANDALONE
+
+std::string plugin_install_dir;
+std::string np_update_str; 
 // int getLock(void)
 // {
 //     struct flock fl;
@@ -79,7 +82,6 @@ bool RunCommand(const std::string &command)
 
 bool RunPluginScript(const std::string &relative_path, std::string &output)
 {
-    auto plugin_install_dir = std::string(PLUGIN_INSTALL_DIR);
     auto result = RunCommand(plugin_install_dir + "/" + relative_path);
     auto output_path = relative_path.substr(0, relative_path.find("sh")).append("output");
     output = ReadOutput(plugin_install_dir + "/" + output_path);
@@ -152,14 +154,15 @@ private:
         const auto payload = msg->get_payload();
         UTL_LOG_INFO("OnMessage");
         UTL_LOG_INFO(payload.c_str());
-        if (!m_json_validator->Verify(payload))
+        std::string get_method;
+        if (!m_json_validator->Verify(payload, get_method))
         {
             UTL_LOG_ERROR("OnMessage payload verify failed");
             return;
         }
         PluginAPI plugin_api;
         plugin_api.ImportFromString(payload);
-        if (plugin_api.method() == "v2/notifyPluginCommand")
+        if (get_method == "v2/notifyPluginCommand")
         {
             NPCommandJson np_cmd_json;
             np_cmd_json.ImportFromString(payload);
@@ -191,7 +194,7 @@ private:
 
                 if ((*match_cmd).name() == "start")
                 {
-                    
+                    UTL_LOG_INFO("match start");
                 }
 
                 std::string cmd_output;
@@ -385,11 +388,11 @@ int main(int argc, char **argv)
         UTL_LOG_WARN("Wrong arguments. Usage: device_plugin [config file]");
         return 1;
     }
-    // argv[1];
-    auto json_source_string = getJsonFromFile(argv[1]);
+    plugin_install_dir = std::string(argv[1]);
+    np_update_str = getJsonFromFile(plugin_install_dir + "/plugin_update_template.json");
     auto json_validator = std::make_shared<JsonValidator>(PLUGIN_NAME, PLUGIN_APP_GUID,
                                                           PLUGIN_ACCESS_KEY, PLUGIN_VERSION,
-                                                          json_source_string);
+                                                          np_update_str );
     WebSocketClient web_client(json_validator);
     web_client.Connect("wss://127.0.0.1:55688");
     web_client.RunSendingLoop();
