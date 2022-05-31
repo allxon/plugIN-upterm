@@ -11,7 +11,7 @@
 #define ASIO_STANDALONE
 
 std::string plugin_install_dir;
-std::string np_update_str; 
+std::string np_update_str;
 // int getLock(void)
 // {
 //     struct flock fl;
@@ -80,10 +80,13 @@ bool RunCommand(const std::string &command)
     }
 }
 
-bool RunPluginScript(const std::string &relative_path, std::string &output)
+bool RunPluginScript(const std::string &relative_path, const std::map<std::string, std::string> &arguments, std::string &output)
 {
-    auto result = RunCommand(plugin_install_dir + "/" + relative_path);
-    auto output_path = relative_path.substr(0, relative_path.find("sh")).append("output");
+    auto command = plugin_install_dir + "/" + relative_path;
+    for (const auto &[key, value] : arguments)
+        command.append(" --" + key + " " + value);
+    auto result = RunCommand(command);
+    auto output_path = relative_path.substr(0, relative_path.find(".sh")).append(".output");
     output = ReadOutput(plugin_install_dir + "/" + output_path);
     return result;
 }
@@ -192,18 +195,12 @@ private:
                     return;
                 }
 
-                if ((*match_cmd).name() == "start")
-                {
-                    UTL_LOG_INFO("match start");
-                }
-
+                std::map<std::string, std::string> arguments;
+                for (const auto &param : receive_cmd.params_json())
+                    arguments[param.name()] = param.value_string();
                 std::string cmd_output;
-                bool cmd_result = RunPluginScript("scripts/commands/" + receive_cmd.name() + ".sh", cmd_output);
+                bool cmd_result = RunPluginScript("scripts/commands/" + receive_cmd.name() + ".sh", arguments, cmd_output);
                 cmds_ack.push_back({receive_cmd.name(), cmd_output});
-
-                // const auto &params = cmd.params_json();
-                // auto result = std::find_if(std::begin(params), std::end(params), [&](const ValueParamJson &param)
-                //    { return module.module_name() == np_state->module_name(); });
             }
 
             NPCommandAckJson np_cmd_ack_json(PLUGIN_APP_GUID, "", np_cmd_json.command_id(),
@@ -238,7 +235,7 @@ private:
         for (const auto &state : states)
         {
             std::string value_output;
-            if (!RunPluginScript("scripts/states/" + state.name() + ".sh", value_output))
+            if (!RunPluginScript("scripts/states/" + state.name() + ".sh", {}, value_output))
                 value_output = "N/A";
             value_params_json.push_back({state.name(), value_output});
         }
@@ -392,7 +389,7 @@ int main(int argc, char **argv)
     np_update_str = getJsonFromFile(plugin_install_dir + "/plugin_update_template.json");
     auto json_validator = std::make_shared<JsonValidator>(PLUGIN_NAME, PLUGIN_APP_GUID,
                                                           PLUGIN_ACCESS_KEY, PLUGIN_VERSION,
-                                                          np_update_str );
+                                                          np_update_str);
     WebSocketClient web_client(json_validator);
     web_client.Connect("wss://127.0.0.1:55688");
     web_client.RunSendingLoop();

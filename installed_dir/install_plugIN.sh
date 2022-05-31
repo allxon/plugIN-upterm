@@ -1,6 +1,4 @@
 #!/bin/bash
-# set -e
-# set -x 
 
 PLUGIN_NAME=plugIN-upterm
 START_PLUGIN_RELATIVE_PATH=scripts/startPlugin.sh
@@ -19,6 +17,10 @@ output_file="install_plugIN_$PLUGIN_APP_GUID.output"
 
 EXECUTABLE_DESCRIPTION=$(file $CURRENT_SH_DIRECTORY/$PLUGIN_APP_GUID/$PLUGIN_NAME)
 ARCH=$(uname -i)
+
+if [[ "$ARCH" == "x86_64" ]]; then
+   ARCH="x86-64"
+fi
 if [[ "$EXECUTABLE_DESCRIPTION" != *"$ARCH"* ]]; then
    echo "Not Supported Architecture" > $output_file 2>&1
    exit 1

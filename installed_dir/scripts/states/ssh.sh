@@ -8,12 +8,10 @@ exec > "${CURRENT}"
 
 while :
 do
-	pidof upterm > /dev/null || { echo "{\"url\":\"\",\"alias\":\"N/A\"}"; break; }
+	pidof upterm > /dev/null || { echo "N/A"; break; }
 
 	URL=$(cat ${CURRENT_SH_DIR}/../commands/ssh_login_statement)
-	WEB_URL="${URL/ssh /"ssh://"}"
-	WEB_URL="${WEB_URL/ -p /":"}"
-	echo "{\"url\":\"${WEB_URL}\",\"alias\":\"${URL}\"}"
+	echo "${URL}"
 
 	break
 done

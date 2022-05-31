@@ -26,42 +26,9 @@
             "description": "",
             "displayType": "string",
             "value": "https://github.com/allxon/plugIN-upterm/blob/master/LICENSE"
-          },
-          {
-            "name": "table_test",
-            "displayCategory": "<string> #optional",
-            "displayName": "<string> #optional",
-            "description": "<string> #optional",
-            "displayType": "table",
-            "value": [
-              {
-                "header1": "header1",
-                "header2": "header2"
-              },
-              {
-                "header1": "header1",
-                "header2": "header2"
-              }
-            ]
-          },
-          {
-            "name": "link_test",
-            "displayCategory": "<string> #optional",
-            "displayName": "<string> #optional",
-            "description": "<string> #optional",
-            "displayType": "link",
-            "value": {
-              "url": "header1",
-              "alias": "header2"
-            }
           }
         ],
         "states": [
-          {
-            "name": "state_key",
-            "displayName": "state_key",
-            "displayType": "string"
-          },
           {
             "name": "version",
             "displayName": "Version",

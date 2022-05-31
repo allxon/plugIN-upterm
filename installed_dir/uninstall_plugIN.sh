@@ -1,6 +1,4 @@
 #!/bin/bash
-# set -e
-# set -x 
 
 COMMAND_UNINSTALL_RELATIVE_PATH=scripts/commands/uninstall.sh
 STOP_PLUGIN_RELATIVE_PATH=scripts/stopPlugin.sh
