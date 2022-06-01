@@ -11,7 +11,7 @@ RUN tar -xf cmake-3.23.2-linux-aarch64.tar.gz && cp -r cmake-3.23.2-linux-aarch6
 FROM install-dependency AS build-stage
 COPY . /app
 WORKDIR /app
-RUN cmake -S . -B build -DBUILD_FROM_SDK_SRC=ON -DCMAKE_BUILD_TYPE=releases -DARCH=jetson
+RUN cmake -S . -B build -DBUILD_FROM_SDK_SRC=ON -DCMAKE_BUILD_TYPE=release -DARCH=jetson
 RUN cmake --build build --target package
 
 FROM scratch AS output-stage
