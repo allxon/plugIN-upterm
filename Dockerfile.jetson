@@ -5,16 +5,14 @@ RUN apt-get update && apt-get install -y \
 	make \
 	libssl-dev \
 	&& rm -rf /var/lib/apt/lists/*
-RUN wget https://github.com/Kitware/CMake/releases/download/v3.23.2/cmake-3.23.2-linux-aarch64.tar.gz
+RUN wget --no-check-certificate https://github.com/Kitware/CMake/releases/download/v3.23.2/cmake-3.23.2-linux-aarch64.tar.gz
 RUN tar -xf cmake-3.23.2-linux-aarch64.tar.gz && cp -r cmake-3.23.2-linux-aarch64/* /usr
 
 FROM install-dependency AS build-stage
 COPY . /app
 WORKDIR /app
-RUN mkdir build
-WORKDIR /app/build
-RUN cmake -DBUILD_FROM_SDK_SRC=ON -DARCH=jetson ..
-RUN cmake --build . --target package
+RUN cmake -S . -B build -DBUILD_FROM_SDK_SRC=ON -DCMAKE_BUILD_TYPE=releases -DARCH=jetson
+RUN cmake --build build --target package
 
 FROM scratch AS output-stage
-COPY --from=build-stage /app/*.tar.gz / 
+COPY --from=build-stage /app/build/*.tar.gz / 

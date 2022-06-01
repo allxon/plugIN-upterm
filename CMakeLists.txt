@@ -5,7 +5,7 @@ project(plugIN-upterm VERSION 1.00.2001)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-set(ARCH "x86" CACHE STRING "target archecture")
+set(ARCH "x86_64" CACHE STRING "target archecture")
 
 # Check and Parse plugin_key
 set(PLUGIN_KEY ${CMAKE_SOURCE_DIR}/plugin_key_${ARCH}.json CACHE FILEPATH "plugIN key file")
