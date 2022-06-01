@@ -102,10 +102,10 @@ After installed all dependency packages, you can build this project under the fo
 ## Developer Zone
 ```
 # build 
-$ sudo docker build --build-arg ARCH=<x86|jetson> .
+$ sudo docker build -f <Dockerfile.x86_64|Dockerfile.jetson> --no-cache  .
 
 # export binary to `output` folder
-$ sudo docker build -o output --build-arg ARCH=<x86|jetson> .
+$ sudo docker build -o output -f <Dockerfile.x86_64|Dockerfile.jetson> .
 ```
 
 ```
@@ -118,5 +118,10 @@ $ sudo docker build -o output --build-arg ARCH=<x86|jetson> .
 /.../cmake-3.23.1-linux-x86_64/bin/cmake
 > which cmake-gui
 /.../cmake-3.23.1-linux-x86_64/bin/cmake-gui
+```
+
+```
+cmake -S . -B build -DBUILD_FROM_SDK_SRC=ON -DCMAKE_BUILD_TYPE=debug
+cmake --build build 
 ```
 
