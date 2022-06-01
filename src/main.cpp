@@ -12,25 +12,26 @@
 
 std::string plugin_install_dir;
 std::string np_update_str;
-// int getLock(void)
-// {
-//     struct flock fl;
-//     int fdlock;
 
-//     fl.l_type = F_WRLCK;
-//     fl.l_whence = SEEK_SET;
-//     fl.l_start = 0;
-//     fl.l_len = 1;
+int getLock(void)
+{
+    struct flock fl;
+    int fdlock;
 
-//     std::string pid_file("/var/run" + std::string(CMAKE_PROJECT_NAME) + ".pid");
-//     if ((fdlock = open(pid_file.c_str(), O_WRONLY | O_CREAT, 0666)) == -1)
-//         return 0;
+    fl.l_type = F_WRLCK;
+    fl.l_whence = SEEK_SET;
+    fl.l_start = 0;
+    fl.l_len = 1;
 
-//     if (fcntl(fdlock, F_SETLK, &fl) == -1)
-//         return 0;
+    std::string pid_file("/var/run" + std::string(PLUGIN_NAME) + ".pid");
+    if ((fdlock = open(pid_file.c_str(), O_WRONLY | O_CREAT, 0666)) == -1)
+        return 0;
 
-//     return 1;
-// }
+    if (fcntl(fdlock, F_SETLK, &fl) == -1)
+        return 0;
+
+    return 1;
+}
 
 std::string ReadOutput(const std::string &path)
 {
@@ -368,11 +369,13 @@ int main(int argc, char **argv)
     Log start; // start Logging
     UTL_LOG_INFO("PLUGIN_VERSION: %s", PLUGIN_VERSION);
 
-    // if (!getLock()) // Check single instance app
-    // {
-    //     UTL_LOG_WARN("Process already running!\n", stderr);
-    //     return 1;
-    // }
+#ifndef DEBUG
+    if (!getLock()) // Check single instance app
+    {
+        UTL_LOG_WARN("Process already running!\n", stderr);
+        return 1;
+    }
+#endif
 
     UTL_LOG_INFO("argc = %d, argv[1] = %s", argc, argv[1]);
     if (argc == 1)
