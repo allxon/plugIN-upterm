@@ -52,11 +52,11 @@ if(BUILD_FROM_SDK_SRC)
 endif()
 
 list(APPEND LINK_LIBS ${PLUGIN_SDK_TARGET} -pthread -lrt -lcrypto -lssl)
-
 list(APPEND EXTRA_INCLUDES ${PROJECT_SOURCE_DIR}/dep/linux-plugin-sdk/include 
                            ${PROJECT_SOURCE_DIR}/dep/websocketpp
                            ${PROJECT_SOURCE_DIR}/dep/asio/asio/include) 
 
+add_compile_definitions("$<$<CONFIG:DEBUG>:DEBUG>")
 target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC ${LINK_LIBS})
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC 
                             ${EXTRA_INCLUDES}
