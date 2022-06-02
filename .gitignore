@@ -2,3 +2,7 @@ lib/*
 bin/*
 build_info.h
 *.tar.gz
+*.ouptut
+*.current
+build/*
+.vscode/*

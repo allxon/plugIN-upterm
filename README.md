@@ -102,8 +102,26 @@ After installed all dependency packages, you can build this project under the fo
 ## Developer Zone
 ```
 # build 
-$ sudo docker build --build-arg ARCH=<x86|jetson> .
+$ sudo docker build -f <Dockerfile.x86_64|Dockerfile.jetson> --no-cache  .
 
 # export binary to `output` folder
-$ sudo docker build -o output --build-arg ARCH=<x86|jetson> .
+$ sudo docker build -o output -f <Dockerfile.x86_64|Dockerfile.jetson> .
 ```
+
+```
+# cmake installation
+```
+> wget https://github.com/Kitware/CMake/releases/download/v3.23.1/cmake-3.23.1-linux-x86_64.sh
+> ./cmake-3.23.1-linux-x86_64.sh
+> export PATH="`pwd`/cmake-3.23.1-linux-x86_64/bin:$PATH" # save it in .bashrc if needed
+> which cmake
+/.../cmake-3.23.1-linux-x86_64/bin/cmake
+> which cmake-gui
+/.../cmake-3.23.1-linux-x86_64/bin/cmake-gui
+```
+
+```
+cmake -S . -B build -DBUILD_FROM_SDK_SRC=ON -DCMAKE_BUILD_TYPE=debug
+cmake --build build 
+```
+

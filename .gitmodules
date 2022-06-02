@@ -1,3 +1,9 @@
 [submodule "linux-plugin-sdk"]
 	path = dep/linux-plugin-sdk
 	url = git@gitlab.com:allxon.com/plugin/linux-plugin-sdk.git
+[submodule "dep/websocketpp"]
+	path = dep/websocketpp
+	url = https://github.com/zaphoyd/websocketpp.git
+[submodule "dep/asio"]
+	path = dep/asio
+	url = https://github.com/chriskohlhoff/asio.git
