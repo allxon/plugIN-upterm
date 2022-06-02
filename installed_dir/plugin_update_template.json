@@ -17,15 +17,24 @@
             "name": "official  Site",
             "displayName": "Powered by",
             "description": "",
-            "displayType": "string",
-            "value": "ttps://upterm.dev"
+            "displayType": "link",
+            "value":
+            {
+              "url": "https://upterm.dev",
+              "alias": "upterm.dev"
+            }
           },
           {
             "name": "license",
             "displayName": "LICENSE",
             "description": "",
-            "displayType": "string",
-            "value": "https://github.com/allxon/plugIN-upterm/blob/master/LICENSE"
+            "displayType": "link",
+            "value":
+            {
+              "url": "https://github.com/allxon/plugIN-upterm/blob/master/LICENSE",
+              "alias": "The 3-Clause BSD License"
+            }
+  
           }
         ],
         "states": [

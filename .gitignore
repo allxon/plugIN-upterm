@@ -2,7 +2,7 @@ lib/*
 bin/*
 build_info.h
 *.tar.gz
-*.ouptut
-*.current
+installed_dir/scripts/*/*.output
+installed_dir/scripts/*/*.current
 build/*
 .vscode/*
