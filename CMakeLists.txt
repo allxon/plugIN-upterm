@@ -47,12 +47,12 @@ add_executable(${CMAKE_PROJECT_NAME} ${SOURCE_FILE} ${UTIL_SOURCE_FILE})
 
 if(BUILD_FROM_SDK_SRC)
     set(PLUGIN_SDK_TARGET plugIN_SDK)
-    add_subdirectory(dep/linux-plugin-sdk)
+    add_subdirectory(dep/plugin-sdk)
     add_dependencies(${CMAKE_PROJECT_NAME} ${PLUGIN_SDK_TARGET})
 endif()
 
 list(APPEND LINK_LIBS ${PLUGIN_SDK_TARGET} -pthread -lrt -lcrypto -lssl)
-list(APPEND EXTRA_INCLUDES ${PROJECT_SOURCE_DIR}/dep/linux-plugin-sdk/include 
+list(APPEND EXTRA_INCLUDES ${PROJECT_SOURCE_DIR}/dep/plugin-sdk/include 
                            ${PROJECT_SOURCE_DIR}/dep/websocketpp
                            ${PROJECT_SOURCE_DIR}/dep/asio/asio/include) 
 
