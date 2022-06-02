@@ -1,5 +1,6 @@
 #!/bin/bash
-exec > "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]%.*}").output"
+CURRENT_SH_DIRECTORY=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+exec &> "${CURRENT_SH_DIRECTORY}/$(basename "${BASH_SOURCE[0]%.*}").output"
 
 id upterm > /dev/null 2>&1 || useradd -m upterm -s /bin/bash -g sudo 
 which apt-get > /dev/null || { echo "apt-get Not founded!"; exit 1; }
