@@ -198,7 +198,7 @@ private:
 
                 std::map<std::string, std::string> arguments;
                 for (const auto &param : receive_cmd.params_json())
-                    arguments[param.name()] = param.value_string();
+                    arguments[param.name()] = param.value_json().value_string();
                 std::string cmd_output;
                 bool cmd_result = RunPluginScript("scripts/commands/" + receive_cmd.name() + ".sh", arguments, cmd_output);
                 cmds_ack.push_back({receive_cmd.name(), cmd_output});
@@ -238,7 +238,7 @@ private:
             std::string value_output;
             if (!RunPluginScript("scripts/states/" + state.name() + ".sh", {}, value_output))
                 value_output = "N/A";
-            value_params_json.push_back({state.name(), value_output});
+            value_params_json.push_back({state.name(), value_output, false});
         }
 
         NPStateJson state_json(PLUGIN_APP_GUID, "", PLUGIN_NAME, value_params_json);
