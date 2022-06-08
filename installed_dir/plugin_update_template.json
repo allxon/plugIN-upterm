@@ -11,10 +11,10 @@
     "modules": [
       {
         "moduleName": "${PLUGIN_NAME}",
-        "displayName": "Plugin SDK",
+        "displayName": "Upterm",
         "properties": [
           {
-            "name": "official  Site",
+            "name": "officialSite",
             "displayName": "Powered by",
             "description": "",
             "displayType": "link",

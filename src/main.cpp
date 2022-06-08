@@ -176,10 +176,10 @@ private:
             std::vector<CommandAckCmdAckJson> cmds_accept;
             for (const auto &cmd : receive_commands)
             {
-                cmds_accept.push_back({cmd.name()});
+                cmds_accept.push_back({cmd.name(), ""});
             }
             NPCommandAckJson np_cmd_accept_json(PLUGIN_APP_GUID, "", np_cmd_json.command_id(),
-                                                np_cmd_json.command_source(), np_cmd_json.module_name(),
+                                                np_cmd_json.command_source(), np_cmd_json.module_name(), "",
                                                 Allxon::NPCommandAckJson::CommandState::ACCEPTED,
                                                 cmds_accept);
             PushCommandQueue(m_cmd_accept_queue, np_cmd_accept_json);
@@ -205,7 +205,7 @@ private:
             }
 
             NPCommandAckJson np_cmd_ack_json(PLUGIN_APP_GUID, "", np_cmd_json.command_id(),
-                                             np_cmd_json.command_source(), np_cmd_json.module_name(),
+                                             np_cmd_json.command_source(), np_cmd_json.module_name(), "",
                                              Allxon::NPCommandAckJson::CommandState::ACKED,
                                              cmds_ack);
             PushCommandQueue(m_cmd_ack_queue, np_cmd_ack_json);
