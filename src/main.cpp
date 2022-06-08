@@ -176,10 +176,10 @@ private:
             std::vector<CommandAckCmdAckJson> cmds_accept;
             for (const auto &cmd : receive_commands)
             {
-                cmds_accept.push_back({cmd.name()});
+                cmds_accept.push_back({cmd.name(), ""});
             }
             NPCommandAckJson np_cmd_accept_json(PLUGIN_APP_GUID, "", np_cmd_json.command_id(),
-                                                np_cmd_json.command_source(), np_cmd_json.module_name(),
+                                                np_cmd_json.command_source(), np_cmd_json.module_name(), "",
                                                 Allxon::NPCommandAckJson::CommandState::ACCEPTED,
                                                 cmds_accept);
             PushCommandQueue(m_cmd_accept_queue, np_cmd_accept_json);
@@ -198,14 +198,14 @@ private:
 
                 std::map<std::string, std::string> arguments;
                 for (const auto &param : receive_cmd.params_json())
-                    arguments[param.name()] = param.value_string();
+                    arguments[param.name()] = param.value_json().value_string();
                 std::string cmd_output;
                 bool cmd_result = RunPluginScript("scripts/commands/" + receive_cmd.name() + ".sh", arguments, cmd_output);
                 cmds_ack.push_back({receive_cmd.name(), cmd_output});
             }
 
             NPCommandAckJson np_cmd_ack_json(PLUGIN_APP_GUID, "", np_cmd_json.command_id(),
-                                             np_cmd_json.command_source(), np_cmd_json.module_name(),
+                                             np_cmd_json.command_source(), np_cmd_json.module_name(), "",
                                              Allxon::NPCommandAckJson::CommandState::ACKED,
                                              cmds_ack);
             PushCommandQueue(m_cmd_ack_queue, np_cmd_ack_json);
@@ -238,7 +238,7 @@ private:
             std::string value_output;
             if (!RunPluginScript("scripts/states/" + state.name() + ".sh", {}, value_output))
                 value_output = "N/A";
-            value_params_json.push_back({state.name(), value_output});
+            value_params_json.push_back({state.name(), value_output, false});
         }
 
         NPStateJson state_json(PLUGIN_APP_GUID, "", PLUGIN_NAME, value_params_json);
