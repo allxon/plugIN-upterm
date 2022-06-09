@@ -40,6 +40,7 @@ Documentation=https://dms.allxon.com/
 Type=simple
 ExecStart=${ALLXON_PLUGIN_DIR}/${PLUGIN_NAME} ${ALLXON_PLUGIN_DIR}
 StandardOutput=null
+Environment="HOME=/root"
 Restart=always
 RestartSec=30
 

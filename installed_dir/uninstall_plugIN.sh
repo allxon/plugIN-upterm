@@ -13,7 +13,7 @@ remove_plugin() {
 
 uninstall_plugIN() {
     if [ -f "/etc/systemd/system/${PLUGIN_SERVICE}" ]; then
-        systemctl stop ${PLUGIN_SERVICE} || exit 1
+        systemctl stop ${PLUGIN_SERVICE} 
         systemctl disable ${PLUGIN_SERVICE} || exit 1  
         rm /etc/systemd/system/${PLUGIN_SERVICE} || exit 1   
     else
