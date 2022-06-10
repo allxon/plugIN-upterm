@@ -5,12 +5,9 @@ project(plugIN-upterm VERSION 2.00.1000)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-set(ARCH "x86_64" CACHE STRING "target archecture")
-
 # Check and Parse plugin_key
-set(PLUGIN_KEY ${CMAKE_SOURCE_DIR}/plugin_key_${ARCH}.json CACHE FILEPATH "plugIN key file")
+set(PLUGIN_KEY ${CMAKE_SOURCE_DIR}/plugin_key_x86_64.json CACHE FILEPATH "plugIN key file")
 file(READ ${PLUGIN_KEY} PLUGIN_KEY_CONTENT)
-message(${PLUGIN_KEY_CONTENT})
 string(JSON PLUGIN_APP_GUID GET ${PLUGIN_KEY_CONTENT} app_guid)
 string(JSON PLUGIN_ACCESS_KEY GET ${PLUGIN_KEY_CONTENT} access_key)
 
