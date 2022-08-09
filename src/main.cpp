@@ -144,6 +144,7 @@ private:
         m_endpoint.close(hdl, websocketpp::close::status::normal, "Connection closed");
         m_endpoint.stop();
         set_connection_established(false);
+        exit(0);
     }
     void OnFail(websocketpp::connection_hdl hdl)
     {
@@ -161,8 +162,9 @@ private:
         std::string get_method;
         if (!m_json_validator->Verify(payload, get_method))
         {
-            UTL_LOG_ERROR("OnMessage payload verify failed");
-            return;
+            // if get offline error from agent core, need reconnect
+            std::cout << m_json_validator->error_message() << std::endl;
+            exit(0);
         }
         PluginAPI plugin_api;
         plugin_api.ImportFromString(payload);
