@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.23)
-project(plugIN-upterm VERSION 2.00.1000)
+project(plugIN-upterm VERSION 2.00.2000)
 
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
