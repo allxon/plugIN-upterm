@@ -1,9 +1,13 @@
 cmake_minimum_required(VERSION 3.23)
 project(plugIN-upterm VERSION 2.1.0)
+set(PLUGIN_SDK_VERSION 2.0.0)
 
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+set(PLUGIN_NAME ${CMAKE_PROJECT_NAME})
+set(PLUGIN_VERSION ${PROJECT_VERSION})
 
 # Check and Parse plugin_key
 set(PLUGIN_KEY ${CMAKE_SOURCE_DIR}/plugin_key.json CACHE FILEPATH "plugIN key file")
