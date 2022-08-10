@@ -1,6 +1,4 @@
-#include "Log.h"
 #include <iostream>
-#include "Util/Utl_Log.h"
 #include "plugin_api/np_update_json.h"
 #include "plugin_api/np_state_json.h"
 #include "plugin_api/np_command_json.h"
@@ -54,7 +52,7 @@ std::string ReadOutput(const std::string &path)
 bool RunCommand(const std::string &command)
 {
     int status = system(command.c_str());
-    UTL_LOG_INFO("run: %s, status = %x", command.c_str(), status);
+    std::cout << "run: " << command.c_str() << ", status = " << status << std::endl;
     if (status < 0)
         return false;
     else
@@ -64,18 +62,18 @@ bool RunCommand(const std::string &command)
             int wexitstatus = WEXITSTATUS(status);
             if (0 == wexitstatus)
             {
-                UTL_LOG_INFO("Program returned normally, exit code %d", wexitstatus);
+                std::cout << "Program returned normally, exit code: " << wexitstatus << std::endl;
                 return true;
             }
             else
             {
-                UTL_LOG_INFO("Run command fail, script exit code: %d\n", wexitstatus);
+                std::cout << "Run command fail, script exit code: " << wexitstatus << std::endl;
                 return false;
             }
         }
         else
         {
-            UTL_LOG_INFO("Program exited by signal.");
+            std::cout << "Program exited by signal." << std::endl;
             return false;
         }
     }
@@ -120,7 +118,7 @@ class WebSocketClient
 private:
     context_ptr OnTLSInit(websocketpp::connection_hdl hdl)
     {
-        UTL_LOG_INFO("OnTLSInit");
+        std::cout << "OnTLSInit" << std::endl;
         context_ptr ctx = websocketpp::lib::make_shared<asio::ssl::context>(asio::ssl::context::tlsv12);
 
         ctx->set_options(asio::ssl::context::default_workarounds |
@@ -134,13 +132,13 @@ private:
 
     void OnOpen(websocketpp::connection_hdl hdl)
     {
-        UTL_LOG_INFO("OnOpen");
+        std::cout << "OnOpen" << std::endl;
         set_connection_established(true);
         SendNotifyPluginUpdate();
     }
     void OnClose(websocketpp::connection_hdl hdl)
     {
-        UTL_LOG_INFO("OnClose");
+        std::cout << "OnClose" << std::endl;
         m_endpoint.close(hdl, websocketpp::close::status::normal, "Connection closed");
         m_endpoint.stop();
         set_connection_established(false);
@@ -148,7 +146,7 @@ private:
     }
     void OnFail(websocketpp::connection_hdl hdl)
     {
-        UTL_LOG_WARN("OnFail");
+        std::cout << "OnFail" << std::endl;
         m_endpoint.get_alog().write(websocketpp::log::alevel::app, "Connection Failed");
         m_endpoint.close(hdl, websocketpp::close::status::normal, "Connection Failed.");
         m_endpoint.stop();
@@ -157,8 +155,8 @@ private:
     void OnMessage(websocketpp::connection_hdl hdl, client::message_ptr msg)
     {
         const auto payload = msg->get_payload();
-        UTL_LOG_INFO("OnMessage");
-        UTL_LOG_INFO(payload.c_str());
+        std::cout << "OnMessage" << std::endl;
+        std::cout << payload.c_str() << std::endl;
         std::string get_method;
         if (!m_json_validator->Verify(payload, get_method))
         {
@@ -172,7 +170,7 @@ private:
         {
             NPCommandJson np_cmd_json;
             np_cmd_json.ImportFromString(payload);
-            UTL_LOG_INFO("get command id: %s", np_cmd_json.command_id().c_str());
+            std::cout << "get command id: %s", np_cmd_json.command_id().c_str() << std::endl;
 
             auto receive_commands = np_cmd_json.commands_json();
             std::vector<CommandAckCmdAckJson> cmds_accept;
@@ -194,7 +192,7 @@ private:
                                               { return update_cmd.name() == receive_cmd.name(); });
                 if (match_cmd == std::end(np_update_commands))
                 {
-                    UTL_LOG_WARN("can't find matched cmd");
+                    std::cout << "can't find matched cmd" << std::endl;
                     return;
                 }
 
@@ -219,7 +217,7 @@ private:
     }
     void SendNotifyPluginUpdate()
     {
-        UTL_LOG_INFO("SendNotifyPluginUpdate");
+        std::cout << "SendNotifyPluginUpdate" << std::endl;
         auto output_string = m_json_validator->np_update_json().ExportToString();
         if (!m_json_validator->Sign(output_string))
         {
@@ -231,7 +229,7 @@ private:
 
     void SendPluginStatesMetrics()
     {
-        UTL_LOG_INFO("SendPluginStateMetrics");
+        std::cout << "SendPluginStateMetrics" << std::endl;
         const auto &states = m_json_validator->np_update_json().modules_json().front().states_json();
 
         std::vector<ValueParamJson> value_params_json;
@@ -258,7 +256,7 @@ private:
     {
         if (queue.empty())
             return;
-        UTL_LOG_INFO("SendPluginCommandAck");
+        std::cout << "SendPluginCommandAck" << std::endl;
         NPCommandAckJson np_cmd_ack_json;
         while (PopCommandQueue(queue, np_cmd_ack_json))
         {
@@ -369,25 +367,24 @@ public:
 int main(int argc, char **argv)
 {
     Log start; // start Logging
-    UTL_LOG_INFO("PLUGIN_VERSION: %s", PLUGIN_VERSION);
+    std::cout << "PLUGIN_VERSION: " << PLUGIN_VERSION << std::endl;
 
 #ifndef DEBUG
     if (!getLock()) // Check single instance app
     {
-        UTL_LOG_WARN("Process already running!\n", stderr);
+        std::cerr << "Process already running!\n" << std::endl;
         return 1;
     }
 #endif
 
-    UTL_LOG_INFO("argc = %d, argv[1] = %s", argc, argv[1]);
     if (argc == 1)
     {
-        UTL_LOG_WARN("Please provide a plugin config file, e.g. \'device_plugin plugin_config.json\'.");
+        std::cerr << "Please provide a plugin config file, e.g. \'device_plugin plugin_config.json\'." << std::endl;
         return 1;
     }
     else if (argc > 2)
     {
-        UTL_LOG_WARN("Wrong arguments. Usage: device_plugin [config file]");
+        std::cerr << "Wrong arguments. Usage: device_plugin [config file]" << std::endl;
         return 1;
     }
     plugin_install_dir = std::string(argv[1]);
