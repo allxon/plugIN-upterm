@@ -83,8 +83,8 @@ include(FetchContent)
 if (BUILD_FROM_SDK_SRC)
     FetchContent_Declare(
         plugIN_SDK
-        GIT_REPOSITORY git@gitlab.com:wayne_liu/plugin-sdk.git
-        GIT_TAG        DMS-2478-turn-off-module-check
+        GIT_REPOSITORY git@gitlab.com:allxon.com/plugin/plugin-sdk.git
+        GIT_TAG        master
     )
     FetchContent_MakeAvailable(plugIN_SDK)
     set(PLUGIN_SDK_TARGET plugIN_SDK)
