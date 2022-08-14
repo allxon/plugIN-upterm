@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.23)
-project(plugIN-upterm VERSION 2.1.0)
-set(PLUGIN_SDK_VERSION 2.0.0)
+project(plugIN-upterm VERSION 3.0.0)
+set(PLUGIN_SDK_VERSION 2.0.1)
 
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -83,8 +83,8 @@ include(FetchContent)
 if (BUILD_FROM_SDK_SRC)
     FetchContent_Declare(
         plugIN_SDK
-        GIT_REPOSITORY git@gitlab.com:allxon.com/plugin/plugin-sdk.git
-        GIT_TAG        master
+        GIT_REPOSITORY git@gitlab.com:wayne_liu/plugin-sdk.git
+        GIT_TAG        DMS-2478-turn-off-module-check
     )
     FetchContent_MakeAvailable(plugIN_SDK)
     set(PLUGIN_SDK_TARGET plugIN_SDK)
@@ -115,7 +115,7 @@ endif()
 configure_file(build_info.h.in build_info.h @ONLY)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 aux_source_directory(${PROJECT_SOURCE_DIR}/src SOURCE_FILE)
-add_executable(${CMAKE_PROJECT_NAME} ${SOURCE_FILE})
+add_executable(${CMAKE_PROJECT_NAME} ${SOURCE_FILE} ${PROJECT_SOURCE_DIR}/dep/cJSON/cJSON.c)
 
 if(WIN32 AND MSVC)
     add_definitions (-D_WEBSOCKETPP_CPP11_STL_)
@@ -138,6 +138,7 @@ endif()
 list(APPEND EXTRA_INCLUDES ${plugin_sdk_SOURCE_DIR}/include
                            ${PROJECT_SOURCE_DIR}/dep/asio/asio/include
                            ${PROJECT_SOURCE_DIR}/dep/websocketpp
+                           ${PROJECT_SOURCE_DIR}/dep/cJSON
     )
 
 target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC ${LINK_LIBS})

@@ -1,15 +1,11 @@
 #include <iostream>
-#include "plugin_api/np_update_json.h"
-#include "plugin_api/np_state_json.h"
-#include "plugin_api/np_command_json.h"
-#include "plugin_api/np_command_ack_json.h"
+#include <fstream>
+#include <fcntl.h>
+#include "cJSON.h"
 #include "json_validator.h"
 #include "build_info.h"
 
 #define ASIO_STANDALONE
-
-std::string plugin_install_dir;
-std::string np_update_str;
 
 int getLock(void)
 {
@@ -49,10 +45,58 @@ std::string ReadOutput(const std::string &path)
     return output;
 }
 
+
+
+std::string getJsonFromFile(const std::string &path)
+{
+    std::string output;
+    std::ifstream myfile(path);
+    if (myfile.is_open())
+    {
+        std::string line;
+        while (std::getline(myfile, line))
+            output.append(line + "\n");
+        myfile.close();
+    }
+    else
+        std::cout << "Unable to open file";
+    return output;
+}
+
+#include "websocketpp/config/asio_client.hpp"
+#include "websocketpp/client.hpp"
+
+using namespace Allxon;
+typedef websocketpp::client<websocketpp::config::asio_tls_client> client;
+typedef websocketpp::lib::shared_ptr<websocketpp::lib::asio::ssl::context> context_ptr;
+
+class Util
+{
+public:
+    static std::string getJsonFromFile(const std::string &path)
+    {
+        std::string output;
+        std::ifstream myfile(path);
+        if (myfile.is_open())
+        {
+            std::string line;
+            while (std::getline(myfile, line))
+                output.append(line + "\n");
+            myfile.close();
+        }
+        else
+            std::cout << "Unable to open file";
+        return output;
+    }
+
+    static std::string plugin_install_dir;
+};
+
 bool RunCommand(const std::string &command)
 {
+    std::cout << "run: " << command.c_str() << std::endl;
     int status = system(command.c_str());
-    std::cout << "run: " << command.c_str() << ", status = " << status << std::endl;
+    std::cout << "return status: " << status << std::endl;
     if (status < 0)
         return false;
     else
@@ -81,37 +125,14 @@ bool RunCommand(const std::string &command)
 
 bool RunPluginScript(const std::string &relative_path, const std::map<std::string, std::string> &arguments, std::string &output)
 {
-    auto command = plugin_install_dir + "/" + relative_path;
+    auto command = Util::plugin_install_dir + "/" + relative_path;
     for (const auto &[key, value] : arguments)
         command.append(" --" + key + " " + value);
     auto result = RunCommand(command);
     auto output_path = relative_path.substr(0, relative_path.find(".sh")).append(".output");
-    output = ReadOutput(plugin_install_dir + "/" + output_path);
+    output = ReadOutput(Util::plugin_install_dir + "/" + output_path);
     return result;
 }
-
-std::string getJsonFromFile(const std::string &path)
-{
-    std::string output;
-    std::ifstream myfile(path);
-    if (myfile.is_open())
-    {
-        std::string line;
-        while (std::getline(myfile, line))
-            output.append(line + "\n");
-        myfile.close();
-    }
-    else
-        std::cout << "Unable to open file";
-    return output;
-}
-
-#include "websocketpp/config/asio_client.hpp"
-#include "websocketpp/client.hpp"
-
-using namespace Allxon;
-typedef websocketpp::client<websocketpp::config::asio_tls_client> client;
-typedef websocketpp::lib::shared_ptr<websocketpp::lib::asio::ssl::context> context_ptr;
 
 class WebSocketClient
 {
@@ -164,110 +185,157 @@ private:
             std::cout << m_json_validator->error_message() << std::endl;
             exit(0);
         }
-        PluginAPI plugin_api;
-        plugin_api.ImportFromString(payload);
         if (get_method == "v2/notifyPluginCommand")
         {
-            NPCommandJson np_cmd_json;
-            np_cmd_json.ImportFromString(payload);
-            std::cout << "get command id: %s", np_cmd_json.command_id().c_str() << std::endl;
-
-            auto receive_commands = np_cmd_json.commands_json();
-            std::vector<CommandAckCmdAckJson> cmds_accept;
-            for (const auto &cmd : receive_commands)
-            {
-                cmds_accept.push_back({cmd.name(), ""});
-            }
-            NPCommandAckJson np_cmd_accept_json(PLUGIN_APP_GUID, "", np_cmd_json.command_id(),
-                                                np_cmd_json.command_source(), np_cmd_json.module_name(), "",
-                                                Allxon::NPCommandAckJson::CommandState::ACCEPTED,
-                                                cmds_accept);
-            PushCommandQueue(m_cmd_accept_queue, np_cmd_accept_json);
-
-            const auto &np_update_commands = m_json_validator->np_update_json().modules_json().front().commands_json();
-            std::vector<CommandAckCmdAckJson> cmds_ack;
-            for (const auto &receive_cmd : receive_commands)
-            {
-                auto match_cmd = std::find_if(std::begin(np_update_commands), std::end(np_update_commands), [&](const UpdateCommandJson &update_cmd)
-                                              { return update_cmd.name() == receive_cmd.name(); });
-                if (match_cmd == std::end(np_update_commands))
-                {
-                    std::cout << "can't find matched cmd" << std::endl;
-                    return;
-                }
-
-                std::map<std::string, std::string> arguments;
-                for (const auto &param : receive_cmd.params_json())
-                    arguments[param.name()] = param.value_json().value_string();
-                std::string cmd_output;
-                bool cmd_result = RunPluginScript("scripts/commands/" + receive_cmd.name() + ".sh", arguments, cmd_output);
-                cmds_ack.push_back({receive_cmd.name(), cmd_output});
-            }
-
-            NPCommandAckJson np_cmd_ack_json(PLUGIN_APP_GUID, "", np_cmd_json.command_id(),
-                                             np_cmd_json.command_source(), np_cmd_json.module_name(), "",
-                                             Allxon::NPCommandAckJson::CommandState::ACKED,
-                                             cmds_ack);
-            PushCommandQueue(m_cmd_ack_queue, np_cmd_ack_json);
+            std::cout << "Get Method:" << get_method << std::endl;
+            auto cmd_cjson = cJSON_Parse(payload.c_str());
+            auto params_cjson = cJSON_GetObjectItemCaseSensitive(cmd_cjson, "params");
+            auto command_id_cjson = cJSON_GetObjectItemCaseSensitive(params_cjson, "commandId");
+            std::cout << "get command id: " << command_id_cjson->valuestring << std::endl;
+            PushCommandQueue(m_cmd_queue, payload);
+            cJSON_Delete(cmd_cjson);
         }
         else
         {
-            UTL_LOG_ERROR("OnMessage payload unknown method");
+            std::cerr << "OnMessage payload unknown method" << std::endl;
         }
     }
     void SendNotifyPluginUpdate()
     {
         std::cout << "SendNotifyPluginUpdate" << std::endl;
-        auto output_string = m_json_validator->np_update_json().ExportToString();
+        std::string notify_plugin_update = Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_update_template.json");
+        auto np_update_cjson = cJSON_Parse(notify_plugin_update.c_str());
+        auto output_char = cJSON_Print(np_update_cjson);
+        std::string output_string(output_char);
+        delete output_char;
+        cJSON_Delete(np_update_cjson);
         if (!m_json_validator->Sign(output_string))
         {
-            UTL_LOG_ERROR(m_json_validator->error_message().c_str());
+            std::cout << m_json_validator->error_message().c_str() << std::endl;
             return;
         }
         m_endpoint.send(m_hdl, output_string.c_str(), websocketpp::frame::opcode::TEXT);
+        std::cout << "Send:" << output_string << std::endl;
     }
 
     void SendPluginStatesMetrics()
     {
         std::cout << "SendPluginStateMetrics" << std::endl;
-        const auto &states = m_json_validator->np_update_json().modules_json().front().states_json();
-
-        std::vector<ValueParamJson> value_params_json;
-        for (const auto &state : states)
+        std::string notify_plugin_update = Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_update_template.json");
+        auto np_update_cjson = cJSON_Parse(notify_plugin_update.c_str());
+        auto params_cjson = cJSON_GetObjectItemCaseSensitive(np_update_cjson, "params");
+        auto modules_cjson = cJSON_GetObjectItemCaseSensitive(params_cjson, "modules");
+        auto module_cjson = cJSON_GetArrayItem(modules_cjson, 0);
+        auto states_cjson = cJSON_GetObjectItemCaseSensitive(module_cjson, "states");
+        std::string notify_plugin_state = Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_state.json");
+        auto np_state_cjson = cJSON_Parse(notify_plugin_state.c_str());
+        auto temp_params_cjson = cJSON_GetObjectItemCaseSensitive(np_state_cjson, "params");
+        auto temp_states_cjson = cJSON_GetObjectItemCaseSensitive(temp_params_cjson, "states");
+        const cJSON *state_cjson = NULL;
+        cJSON_ArrayForEach(state_cjson, states_cjson)
         {
+            auto state_name_cjson = cJSON_GetObjectItemCaseSensitive(state_cjson, "name"); 
+            auto state_name_str = std::string(cJSON_GetStringValue(state_name_cjson));
             std::string value_output;
-            if (!RunPluginScript("scripts/states/" + state.name() + ".sh", {}, value_output))
+            if (!RunPluginScript("scripts/states/" + state_name_str + ".sh", {}, value_output))
                 value_output = "N/A";
-            value_params_json.push_back({state.name(), value_output, false});
+            auto state_output_cjson = cJSON_CreateObject();
+            cJSON_AddStringToObject(state_output_cjson, "name", state_name_str.c_str());
+            cJSON_AddStringToObject(state_output_cjson, "value", value_output.c_str());
+            cJSON_AddItemToArray(temp_states_cjson, state_output_cjson);
         }
-
-        NPStateJson state_json(PLUGIN_APP_GUID, "", PLUGIN_NAME, value_params_json);
-        auto output_str = state_json.ExportToString();
-        if (!m_json_validator->Sign(output_str))
+        auto output_char = cJSON_Print(np_state_cjson);
+        std::string output_string(output_char);
+        delete output_char;
+        cJSON_Delete(np_state_cjson); 
+        cJSON_Delete(np_update_cjson); 
+        if (!m_json_validator->Sign(output_string))
         {
-            UTL_LOG_ERROR(m_json_validator->error_message().c_str());
+            std::cerr << m_json_validator->error_message().c_str() << std::endl;
             return;
         }
 
-        m_endpoint.send(m_hdl, output_str.c_str(), websocketpp::frame::opcode::TEXT);
+        m_endpoint.send(m_hdl, output_string.c_str(), websocketpp::frame::opcode::TEXT);
+        std::cout << "Send:" << output_string << std::endl;
     }
 
-    void SendPluginCommandAck(std::queue<Allxon::NPCommandAckJson> &queue)
+    void SendPluginCommandAck(std::queue<std::string> &queue)
     {
         if (queue.empty())
             return;
         std::cout << "SendPluginCommandAck" << std::endl;
-        NPCommandAckJson np_cmd_ack_json;
-        while (PopCommandQueue(queue, np_cmd_ack_json))
+        std::string np_cmd_ack_str;
+        while (PopCommandQueue(queue, np_cmd_ack_str))
         {
-            auto output_str = np_cmd_ack_json.ExportToString();
-            if (!m_json_validator->Sign(output_str))
+            std::string get_method;
+            m_json_validator->Verify(np_cmd_ack_str, get_method);
+            auto cmd_cjson = cJSON_Parse(np_cmd_ack_str.c_str());
+            auto params_cjson = cJSON_GetObjectItemCaseSensitive(cmd_cjson, "params");
+            auto command_id_cjson = cJSON_GetObjectItemCaseSensitive(params_cjson, "commandId");
+            auto commands_cjson = cJSON_GetObjectItemCaseSensitive(params_cjson, "commands");
+            auto command_cjson = cJSON_GetArrayItem(commands_cjson, 0);
+            auto command_name_cjson= cJSON_GetObjectItemCaseSensitive(command_cjson, "name");
+            auto command_params_cjson= cJSON_GetObjectItemCaseSensitive(command_cjson, "params");
+            auto command_name_str = std::string(command_name_cjson->valuestring);
+
+            auto cmd_accept = Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_command_ack.json");
+            auto cmd_accept_cjson = cJSON_Parse(cmd_accept.c_str());
+            auto accept_params_cjson = cJSON_GetObjectItemCaseSensitive(cmd_accept_cjson, "params");
+            auto accept_command_id_cjson = cJSON_GetObjectItemCaseSensitive(accept_params_cjson, "commandId");
+            auto accept_command_state_cjson = cJSON_GetObjectItemCaseSensitive(accept_params_cjson, "commandState");
+            auto accept_command_acks_cjson = cJSON_GetObjectItemCaseSensitive(accept_params_cjson, "commandAcks");
+            auto accept_command_ack_cjson = cJSON_GetArrayItem(accept_command_acks_cjson, 0);
+            auto accept_cmd_name_cjson= cJSON_GetObjectItemCaseSensitive(accept_command_ack_cjson, "name");
+            auto accept_result_cjson = cJSON_GetObjectItemCaseSensitive(accept_command_ack_cjson, "result");
+
+            cJSON_SetValuestring(accept_command_id_cjson, command_id_cjson->valuestring);
+            cJSON_SetValuestring(accept_cmd_name_cjson, command_name_str.c_str());
+            cJSON_SetValuestring(accept_command_state_cjson, "ACCEPTED");
+            cJSON_AddStringToObject(accept_result_cjson, "output", "received command");
+            char* cmd_accept_str_ptr = cJSON_Print(cmd_accept_cjson);
+            auto cmd_accept_str = std::string(cmd_accept_str_ptr);
+            delete cmd_accept_str_ptr;
+
+            if (!m_json_validator->Sign(cmd_accept_str))
             {
-                UTL_LOG_ERROR(m_json_validator->error_message().c_str());
+                std::cerr << m_json_validator->error_message().c_str() << std::endl;
+                cJSON_Delete(cmd_cjson);
+                cJSON_Delete(cmd_accept_cjson);
                 return;
             }
 
-            m_endpoint.send(m_hdl, output_str.c_str(), websocketpp::frame::opcode::TEXT);
+            m_endpoint.send(m_hdl, cmd_accept_str.c_str(), websocketpp::frame::opcode::TEXT);
+            std::cout << "Send:" << std::endl;
+            std::cout << cmd_accept_str << std::endl;
+
+            std::map<std::string, std::string> arguments;
+            const cJSON *cmd_param_cjson = NULL;
+            cJSON_ArrayForEach(cmd_param_cjson, command_params_cjson) {
+                auto name_cjson = cJSON_GetObjectItemCaseSensitive(cmd_param_cjson, "name");
+                auto value_cjson = cJSON_GetObjectItemCaseSensitive(cmd_param_cjson, "value");
+                arguments[std::string(name_cjson->valuestring)] = std::string(value_cjson->valuestring);
+            }
+            std::string cmd_output;
+            bool cmd_result = RunPluginScript("scripts/commands/" + command_name_str + ".sh", arguments, cmd_output);
+            cJSON_SetValuestring(accept_command_state_cjson, "ACKED");
+            cJSON_AddStringToObject(accept_result_cjson, "response", cmd_output.c_str());
+            char *cmd_ack_str_ptr = cJSON_Print(cmd_accept_cjson);
+            auto cmd_ack_str = std::string(cmd_ack_str_ptr);
+            delete cmd_ack_str_ptr;
+
+            if (!m_json_validator->Sign(cmd_ack_str))
+            {
+                std::cerr << m_json_validator->error_message().c_str() << std::endl;
+                cJSON_Delete(cmd_cjson);
+                cJSON_Delete(cmd_accept_cjson);
+                return;
+            }
+
+            m_endpoint.send(m_hdl, cmd_ack_str.c_str(), websocketpp::frame::opcode::TEXT);
+            std::cout << "Send:" << std::endl;
+            std::cout << cmd_ack_str << std::endl;
+            cJSON_Delete(cmd_cjson);
+            cJSON_Delete(cmd_accept_cjson);
         }
     }
 
@@ -282,18 +350,18 @@ private:
         m_connection_established = value;
     }
 
-    void PushCommandQueue(std::queue<Allxon::NPCommandAckJson> &queue, const Allxon::NPCommandAckJson &command)
+    void PushCommandQueue(std::queue<std::string> &queue, std::string data)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
-        queue.push(command);
+        queue.push(data);
     }
 
-    bool PopCommandQueue(std::queue<Allxon::NPCommandAckJson> &queue, Allxon::NPCommandAckJson &pop_command)
+    bool PopCommandQueue(std::queue<std::string> &queue, std::string &pop_data)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
         if (queue.empty())
             return false;
-        pop_command = queue.front();
+        pop_data = queue.front();
         queue.pop();
         return true;
     }
@@ -305,11 +373,12 @@ private:
     websocketpp::lib::shared_ptr<std::thread> m_send_thread;
     bool m_connection_established = false;
     std::shared_ptr<Allxon::JsonValidator> m_json_validator;
-    std::queue<Allxon::NPCommandAckJson> m_cmd_accept_queue;
-    std::queue<Allxon::NPCommandAckJson> m_cmd_ack_queue;
+    std::queue<std::string> m_cmd_queue;
+    std::string m_url;
 
 public:
-    WebSocketClient(std::shared_ptr<Allxon::JsonValidator> json_validator) : m_json_validator(json_validator)
+    WebSocketClient(std::shared_ptr<Allxon::JsonValidator> json_validator, const std::string &url) 
+        : m_json_validator(json_validator), m_url(url)
     {
         m_endpoint.set_reuse_addr(true);
         m_endpoint.clear_access_channels(websocketpp::log::alevel::all);
@@ -336,8 +405,7 @@ public:
         client::connection_ptr con = m_endpoint.get_connection(uri, ec);
         if (ec)
         {
-            UTL_LOG_ERROR("Connect initialization error: %s", ec.message().c_str());
-            std::cout << "Connect initialization error: " << ec.message() << std::endl;
+            std::cerr << "Connect initialization error: " << ec.message() << std::endl;
             return;
         }
         m_hdl = con->get_handle();
@@ -346,6 +414,7 @@ public:
 
     void RunSendingLoop()
     {
+        Connect(m_url);
         int count = 0;
         while (true)
         {
@@ -353,8 +422,7 @@ public:
             if (!connection_established())
                 continue;
 
-            SendPluginCommandAck(m_cmd_accept_queue);
-            SendPluginCommandAck(m_cmd_ack_queue);
+            SendPluginCommandAck(m_cmd_queue);
             if (++count == 60)
             {
                 SendPluginStatesMetrics();
@@ -364,19 +432,11 @@ public:
     }
 };
 
+std::string Util::plugin_install_dir = "";
+
 int main(int argc, char **argv)
 {
-    Log start; // start Logging
     std::cout << "PLUGIN_VERSION: " << PLUGIN_VERSION << std::endl;
-
-#ifndef DEBUG
-    if (!getLock()) // Check single instance app
-    {
-        std::cerr << "Process already running!\n" << std::endl;
-        return 1;
-    }
-#endif
-
     if (argc == 1)
     {
         std::cerr << "Please provide a plugin config file, e.g. \'device_plugin plugin_config.json\'." << std::endl;
@@ -387,13 +447,12 @@ int main(int argc, char **argv)
         std::cerr << "Wrong arguments. Usage: device_plugin [config file]" << std::endl;
         return 1;
     }
-    plugin_install_dir = std::string(argv[1]);
-    np_update_str = getJsonFromFile(plugin_install_dir + "/plugin_update_template.json");
+    Util::plugin_install_dir = std::string(argv[1]);
+    auto np_update_json = Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_update_template.json");
     auto json_validator = std::make_shared<JsonValidator>(PLUGIN_NAME, PLUGIN_APP_GUID,
                                                           PLUGIN_ACCESS_KEY, PLUGIN_VERSION,
-                                                          np_update_str);
-    WebSocketClient web_client(json_validator);
-    web_client.Connect("wss://127.0.0.1:55688");
+                                                          np_update_json);
+    WebSocketClient web_client(json_validator, "wss://127.0.0.1:55688");
     web_client.RunSendingLoop();
     return 0;
 }
