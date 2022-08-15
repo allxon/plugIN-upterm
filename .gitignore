@@ -2,7 +2,7 @@ lib/*
 bin/*
 build_info.h
 *.tar.gz
-installed_dir/scripts/*/*.output
-installed_dir/scripts/*/*.current
+resource_dir_linux/scripts/*/*.output
+resource_dir_linux/scripts/*/*.current
 build/*
 .vscode/*

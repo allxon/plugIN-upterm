@@ -4,6 +4,7 @@
   "params": {
     "appGUID": "${PLUGIN_APP_GUID}",
     "epoch": "",
+    "sdk": "${PLUGIN_SDK_VERSION}",
     "appName": "${PLUGIN_NAME}",
     "displayName": "${PLUGIN_NAME}",
     "type": "ib",

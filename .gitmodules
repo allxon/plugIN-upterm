@@ -4,6 +4,6 @@
 [submodule "dep/asio"]
 	path = dep/asio
 	url = https://github.com/chriskohlhoff/asio.git
-[submodule "dep/plugin-sdk"]
-	path = dep/plugin-sdk
-	url = git@gitlab.com:allxon.com/plugin/plugin-sdk.git
+[submodule "dep/cJSON"]
+	path = dep/cJSON
+	url = https://github.com/DaveGamble/cJSON.git
