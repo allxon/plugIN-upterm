@@ -11,7 +11,7 @@ RUN tar -xf cmake-3.23.2-linux-x86_64.tar.gz && cp -r cmake-3.23.2-linux-x86_64/
 FROM install-dependency AS build-stage
 COPY . /app
 WORKDIR /app
-RUN cmake -S . -B build -DBUILD_FROM_SDK_SRC=ON -DCMAKE_BUILD_TYPE=release -DPLUGIN_KEY=plugin_key.json
+RUN cmake -S . -B build -DCMAKE_BUILD_TYPE=release -DPLUGIN_KEY=plugin_key.json
 RUN cmake --build build --target package
 
 FROM scratch AS output-stage
