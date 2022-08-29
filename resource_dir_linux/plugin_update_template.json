@@ -108,10 +108,10 @@
             "params": []
           }
         ],
-        "metrics": null,
-        "events": null,
-        "alarms": null,
-        "configs": null
+        "metrics": [],
+        "events": [],
+        "alarms": [],
+        "configs": []
       }
     ]
   }
