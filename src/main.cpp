@@ -300,6 +300,7 @@ private:
             auto accept_command_id_cjson = cJSON_GetObjectItemCaseSensitive(accept_params_cjson, "commandId");
             auto accept_command_state_cjson = cJSON_GetObjectItemCaseSensitive(accept_params_cjson, "commandState");
             auto accept_command_acks_cjson = cJSON_GetObjectItemCaseSensitive(accept_params_cjson, "commandAcks");
+            auto accept_states_cjson = cJSON_GetObjectItemCaseSensitive(accept_params_cjson, "states");
             auto accept_command_ack_cjson = cJSON_GetArrayItem(accept_command_acks_cjson, 0);
             auto accept_cmd_name_cjson= cJSON_GetObjectItemCaseSensitive(accept_command_ack_cjson, "name");
             auto accept_result_cjson = cJSON_GetObjectItemCaseSensitive(accept_command_ack_cjson, "result");
@@ -335,6 +336,28 @@ private:
             bool cmd_result = RunPluginScript("scripts/commands/" + command_name_str + ".sh", arguments, cmd_output);
             cJSON_SetValuestring(accept_command_state_cjson, "ACKED");
             cJSON_AddStringToObject(accept_result_cjson, "response", cmd_output.c_str());
+
+            std::string notify_plugin_update = Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_update_template.json");
+            auto np_update_cjson = cJSON_Parse(notify_plugin_update.c_str());
+            auto np_params_cjson = cJSON_GetObjectItemCaseSensitive(np_update_cjson, "params");
+            auto modules_cjson = cJSON_GetObjectItemCaseSensitive(np_params_cjson, "modules");
+            auto module_cjson = cJSON_GetArrayItem(modules_cjson, 0);
+            auto states_cjson = cJSON_GetObjectItemCaseSensitive(module_cjson, "states");
+
+            const cJSON *state_cjson = NULL;
+            cJSON_ArrayForEach(state_cjson, states_cjson)
+            {
+                auto state_name_cjson = cJSON_GetObjectItemCaseSensitive(state_cjson, "name"); 
+                auto state_name_str = std::string(cJSON_GetStringValue(state_name_cjson));
+                std::string value_output;
+                if (!RunPluginScript("scripts/states/" + state_name_str + ".sh", {}, value_output))
+                    value_output = "N/A";
+                auto state_output_cjson = cJSON_CreateObject();
+                cJSON_AddStringToObject(state_output_cjson, "name", state_name_str.c_str());
+                cJSON_AddStringToObject(state_output_cjson, "value", value_output.c_str());
+                cJSON_AddItemToArray(accept_states_cjson, state_output_cjson);
+            }
+
             char *cmd_ack_str_ptr = cJSON_Print(cmd_accept_cjson);
             auto cmd_ack_str = std::string(cmd_ack_str_ptr);
             delete cmd_ack_str_ptr;
@@ -344,6 +367,7 @@ private:
                 std::cerr << m_json_validator->error_message().c_str() << std::endl;
                 cJSON_Delete(cmd_cjson);
                 cJSON_Delete(cmd_accept_cjson);
+                cJSON_Delete(np_update_cjson);
                 return;
             }
 
@@ -352,6 +376,7 @@ private:
             std::cout << cmd_ack_str << std::endl;
             cJSON_Delete(cmd_cjson);
             cJSON_Delete(cmd_accept_cjson);
+            cJSON_Delete(np_update_cjson);
         }
     }
 
