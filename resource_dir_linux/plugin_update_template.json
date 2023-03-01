@@ -54,6 +54,7 @@
           {
             "name": "ssh",
             "displayName": "SSH",
+            "description": "Copy and paste the SSH key in local terminal",
             "displayType": "string"
           }
         ],
