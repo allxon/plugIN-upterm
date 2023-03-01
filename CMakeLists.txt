@@ -10,7 +10,7 @@ set(PLUGIN_NAME ${CMAKE_PROJECT_NAME})
 set(PLUGIN_VERSION ${PROJECT_VERSION})
 
 # Check and Parse plugin_key
-set(PLUGIN_KEY ${CMAKE_SOURCE_DIR}/plugin_key.json CACHE FILEPATH "plugIN key file")
+set(PLUGIN_KEY ${CMAKE_SOURCE_DIR}/plugin_credential.json CACHE FILEPATH "plugIN credential file")
 if(NOT EXISTS ${PLUGIN_KEY})
     message(FATAL_ERROR "can't found ${PLUGIN_KEY}")
 endif()

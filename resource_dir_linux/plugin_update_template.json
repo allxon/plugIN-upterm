@@ -53,7 +53,8 @@
           },
           {
             "name": "ssh",
-            "displayName": "SSH",
+            "displayName": "SSH Session",
+            "description": "Copy and paste the SSH key in local terminal",
             "displayType": "string"
           }
         ],
