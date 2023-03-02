@@ -6,13 +6,13 @@
     "epoch": "",
     "sdk": "${OCTO_SDK_VERSION}",
     "appName": "${PLUGIN_NAME}",
-    "displayName": "${PLUGIN_NAME}",
+    "displayName": "Upterm Add-in",
     "type": "ib",
     "version": "${PLUGIN_VERSION}",
     "modules": [
       {
         "moduleName": "${PLUGIN_NAME}",
-        "displayName": "Upterm",
+        "displayName": "Upterm Add-in",
         "properties": [
           {
             "name": "officialSite",
