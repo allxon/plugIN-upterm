@@ -54,7 +54,7 @@
           {
             "name": "ssh",
             "displayName": "SSH Session",
-            "description": "Copy and paste the SSH key in local terminal",
+            "description": "Copy and paste the SSH session in the local terminal.\nNote: If you get \"Permission denied\", please follow user guide to generate an ED25519 key pair on the client side for authentication.",
             "displayType": "string"
           }
         ],
