@@ -1,4 +1,4 @@
-plugin_key.json
+plugin_credential.json
 lib/*
 bin/*
 build_info.h
