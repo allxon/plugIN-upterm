@@ -1,9 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <fcntl.h>
-#include "cJSON.h"
-#include "json_validator.h"
-#include "build_info.h"
+#include "octo/octo.h"
 
 #define ASIO_STANDALONE
 
@@ -44,8 +42,6 @@ std::string ReadOutput(const std::string &path)
 
     return output;
 }
-
-
 
 std::string getJsonFromFile(const std::string &path)
 {
@@ -131,6 +127,11 @@ bool RunPluginScript(const std::string &relative_path, const std::map<std::strin
     auto result = RunCommand(command);
     auto output_path = relative_path.substr(0, relative_path.find(".sh")).append(".output");
     output = ReadOutput(Util::plugin_install_dir + "/" + output_path);
+    if (output.size() > 1500)
+    {
+        output = output.substr(0, 1500);
+        output.append("...");
+    }
     return result;
 }
 
@@ -175,41 +176,34 @@ private:
     }
     void OnMessage(websocketpp::connection_hdl hdl, client::message_ptr msg)
     {
-        const auto payload = msg->get_payload();
-        std::cout << "OnMessage" << std::endl;
-        std::cout << payload.c_str() << std::endl;
+        const auto payload = AJson::create(msg->get_payload());
+        std::cout << "on_message" << std::endl;
+        std::cout << payload.print(false) << std::endl;
 
         // Handle JSON-RPC error object
-        auto payload_cjson = cJSON_Parse(payload.c_str());
-        if (cJSON_HasObjectItem(payload_cjson, "error"))
+        if (payload.has_object_item("error"))
         {
-            auto error_cjson = cJSON_GetObjectItemCaseSensitive(payload_cjson, "error");
-            auto error_code_cjson = cJSON_GetObjectItemCaseSensitive(error_cjson, "code");
-            auto error_code = cJSON_GetStringValue(error_code_cjson);
-            auto error_msg_cjson = cJSON_GetObjectItemCaseSensitive(error_cjson, "message");
-            auto error_msg = cJSON_GetStringValue(error_msg_cjson);
-            printf("Received JSON-RPC error object, error code: %s, error_message: %s\n", error_code, error_msg);
-            cJSON_Delete(payload_cjson);
+            auto error = payload.item("error");
+            printf("Received JSON-RPC error object, error code: %s, error_message: %s\n",
+                   error.item("code").string().c_str(), error.item("message").string().c_str());
             return;
         }
-        cJSON_Delete(payload_cjson);
 
         std::string get_method;
-        if (!m_json_validator->Verify(payload, get_method))
+        auto content = payload.print(false);
+        if (!octo_->verify(content, get_method))
         {
-            // if get offline error from agent core, need reconnect
-            std::cout << m_json_validator->error_message() << std::endl;
-            exit(0);
+            std::cout << octo_->error_message() << std::endl;
+            std::cerr << "Error code: " << std::to_string(static_cast<int>(octo_->error_code())) << std::endl;
+            return;
         }
+
         if (get_method == "v2/notifyPluginCommand")
         {
             std::cout << "Get Method:" << get_method << std::endl;
-            auto cmd_cjson = cJSON_Parse(payload.c_str());
-            auto params_cjson = cJSON_GetObjectItemCaseSensitive(cmd_cjson, "params");
-            auto command_id_cjson = cJSON_GetObjectItemCaseSensitive(params_cjson, "commandId");
-            std::cout << "get command id: " << command_id_cjson->valuestring << std::endl;
-            PushCommandQueue(m_cmd_queue, payload);
-            cJSON_Delete(cmd_cjson);
+            auto cmd_id = payload.item("params").item("commandId").string();
+            std::cout << "get command id: " << cmd_id << std::endl;
+            PushCommandQueue(m_cmd_queue, content);
         }
         else
         {
@@ -219,60 +213,43 @@ private:
     void SendNotifyPluginUpdate()
     {
         std::cout << "SendNotifyPluginUpdate" << std::endl;
-        std::string notify_plugin_update = Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_update_template.json");
-        auto np_update_cjson = cJSON_Parse(notify_plugin_update.c_str());
-        auto output_char = cJSON_Print(np_update_cjson);
-        std::string output_string(output_char);
-        delete output_char;
-        cJSON_Delete(np_update_cjson);
-        if (!m_json_validator->Sign(output_string))
+        auto np_update = AJson::create(Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_update_template.json")).print(false);
+        if (!octo_->sign(np_update))
         {
-            std::cout << m_json_validator->error_message().c_str() << std::endl;
+            std::cout << octo_->error_message().c_str() << std::endl;
+            std::cerr << "Error code: " << std::to_string(static_cast<int>(octo_->error_code())) << std::endl;
             return;
         }
-        m_endpoint.send(m_hdl, output_string.c_str(), websocketpp::frame::opcode::TEXT);
-        std::cout << "Send:" << output_string << std::endl;
+        m_endpoint.send(m_hdl, np_update.c_str(), websocketpp::frame::opcode::TEXT);
+        std::cout << "Send:" << np_update << std::endl;
     }
 
     void SendPluginStatesMetrics()
     {
         std::cout << "SendPluginStateMetrics" << std::endl;
-        std::string notify_plugin_update = Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_update_template.json");
-        auto np_update_cjson = cJSON_Parse(notify_plugin_update.c_str());
-        auto params_cjson = cJSON_GetObjectItemCaseSensitive(np_update_cjson, "params");
-        auto modules_cjson = cJSON_GetObjectItemCaseSensitive(params_cjson, "modules");
-        auto module_cjson = cJSON_GetArrayItem(modules_cjson, 0);
-        auto states_cjson = cJSON_GetObjectItemCaseSensitive(module_cjson, "states");
-        std::string notify_plugin_state = Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_state.json");
-        auto np_state_cjson = cJSON_Parse(notify_plugin_state.c_str());
-        auto temp_params_cjson = cJSON_GetObjectItemCaseSensitive(np_state_cjson, "params");
-        auto temp_states_cjson = cJSON_GetObjectItemCaseSensitive(temp_params_cjson, "states");
-        const cJSON *state_cjson = NULL;
-        cJSON_ArrayForEach(state_cjson, states_cjson)
+        auto np_update_state = AJson::create(Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_update_template.json")).item("params").item("modules").item(0).item("states");
+        auto np_states_temp = AJson::create(Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_state.json"));
+
+        for (int i = 0; i < np_update_state.array_size(); ++i)
         {
-            auto state_name_cjson = cJSON_GetObjectItemCaseSensitive(state_cjson, "name"); 
-            auto state_name_str = std::string(cJSON_GetStringValue(state_name_cjson));
+            auto state_name = np_update_state.item(i).item("name").string();
             std::string value_output;
-            if (!RunPluginScript("scripts/states/" + state_name_str + ".sh", {}, value_output))
+            if (!RunPluginScript("scripts/states/" + state_name + ".sh", {}, value_output))
                 value_output = "N/A";
-            auto state_output_cjson = cJSON_CreateObject();
-            cJSON_AddStringToObject(state_output_cjson, "name", state_name_str.c_str());
-            cJSON_AddStringToObject(state_output_cjson, "value", value_output.c_str());
-            cJSON_AddItemToArray(temp_states_cjson, state_output_cjson);
+            auto state_output_json = AJson::create_object({{"name", state_name.c_str()},
+                                                           {"value", value_output.c_str()}});
+            np_states_temp["params"]["states"].add_item_to_array(state_output_json);
         }
-        auto output_char = cJSON_Print(np_state_cjson);
-        std::string output_string(output_char);
-        delete output_char;
-        cJSON_Delete(np_state_cjson); 
-        cJSON_Delete(np_update_cjson); 
-        if (!m_json_validator->Sign(output_string))
+        auto np_state = np_states_temp.print(false);
+        if (!octo_->sign(np_state))
         {
-            std::cerr << m_json_validator->error_message().c_str() << std::endl;
+            std::cerr << octo_->error_message().c_str() << std::endl;
+            std::cerr << "Error code: " << std::to_string(static_cast<int>(octo_->error_code())) << std::endl;
             return;
         }
 
-        m_endpoint.send(m_hdl, output_string.c_str(), websocketpp::frame::opcode::TEXT);
-        std::cout << "Send:" << output_string << std::endl;
+        m_endpoint.send(m_hdl, np_state.c_str(), websocketpp::frame::opcode::TEXT);
+        std::cout << "Send:" << np_state << std::endl;
     }
 
     void SendPluginCommandAck(std::queue<std::string> &queue)
@@ -284,99 +261,68 @@ private:
         while (PopCommandQueue(queue, np_cmd_ack_str))
         {
             std::string get_method;
-            m_json_validator->Verify(np_cmd_ack_str, get_method);
-            auto cmd_cjson = cJSON_Parse(np_cmd_ack_str.c_str());
-            auto params_cjson = cJSON_GetObjectItemCaseSensitive(cmd_cjson, "params");
-            auto command_id_cjson = cJSON_GetObjectItemCaseSensitive(params_cjson, "commandId");
-            auto commands_cjson = cJSON_GetObjectItemCaseSensitive(params_cjson, "commands");
-            auto command_cjson = cJSON_GetArrayItem(commands_cjson, 0);
-            auto command_name_cjson= cJSON_GetObjectItemCaseSensitive(command_cjson, "name");
-            auto command_params_cjson= cJSON_GetObjectItemCaseSensitive(command_cjson, "params");
-            auto command_name_str = std::string(command_name_cjson->valuestring);
+            octo_->verify(np_cmd_ack_str, get_method);
+            auto np_cmd_ack_json = AJson::create(np_cmd_ack_str);
+            auto command_json = np_cmd_ack_json.item("params").item("commands").item(0);
 
             auto cmd_accept = Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_command_ack.json");
-            auto cmd_accept_cjson = cJSON_Parse(cmd_accept.c_str());
-            auto accept_params_cjson = cJSON_GetObjectItemCaseSensitive(cmd_accept_cjson, "params");
-            auto accept_command_id_cjson = cJSON_GetObjectItemCaseSensitive(accept_params_cjson, "commandId");
-            auto accept_command_state_cjson = cJSON_GetObjectItemCaseSensitive(accept_params_cjson, "commandState");
-            auto accept_command_acks_cjson = cJSON_GetObjectItemCaseSensitive(accept_params_cjson, "commandAcks");
-            auto accept_states_cjson = cJSON_GetObjectItemCaseSensitive(accept_params_cjson, "states");
-            auto accept_command_ack_cjson = cJSON_GetArrayItem(accept_command_acks_cjson, 0);
-            auto accept_cmd_name_cjson= cJSON_GetObjectItemCaseSensitive(accept_command_ack_cjson, "name");
-            auto accept_result_cjson = cJSON_GetObjectItemCaseSensitive(accept_command_ack_cjson, "result");
-
-            cJSON_SetValuestring(accept_command_id_cjson, command_id_cjson->valuestring);
-            cJSON_SetValuestring(accept_cmd_name_cjson, command_name_str.c_str());
-            cJSON_SetValuestring(accept_command_state_cjson, "ACCEPTED");
-            cJSON_AddStringToObject(accept_result_cjson, "output", "received command");
-            char* cmd_accept_str_ptr = cJSON_Print(cmd_accept_cjson);
-            auto cmd_accept_str = std::string(cmd_accept_str_ptr);
-            delete cmd_accept_str_ptr;
-
-            if (!m_json_validator->Sign(cmd_accept_str))
+            auto cmd_accept_json = AJson::create(cmd_accept);
+            cmd_accept_json["params"]["commandId"].set_string(np_cmd_ack_json.item("params").item("commandId").string());
+            cmd_accept_json["params"]["commandState"].set_string("ACCEPTED");
+            cmd_accept_json["params"]["commandAcks"][0]["name"].set_string(command_json.item("name").string());
+            cmd_accept_json["params"]["commandAcks"][0]["result"].add_item_to_object("output", "received command");
+            auto np_cmd_accept = cmd_accept_json.print(false);
+            if (!octo_->sign(np_cmd_accept))
             {
-                std::cerr << m_json_validator->error_message().c_str() << std::endl;
-                cJSON_Delete(cmd_cjson);
-                cJSON_Delete(cmd_accept_cjson);
+                std::cerr << octo_->error_message().c_str() << std::endl;
+                std::cerr << "Error code: " << std::to_string(static_cast<int>(octo_->error_code())) << std::endl;
                 return;
             }
 
-            m_endpoint.send(m_hdl, cmd_accept_str.c_str(), websocketpp::frame::opcode::TEXT);
+            m_endpoint.send(m_hdl, np_cmd_accept.c_str(), websocketpp::frame::opcode::TEXT);
             std::cout << "Send:" << std::endl;
-            std::cout << cmd_accept_str << std::endl;
+            std::cout << np_cmd_accept << std::endl;
 
             std::map<std::string, std::string> arguments;
-            const cJSON *cmd_param_cjson = NULL;
-            cJSON_ArrayForEach(cmd_param_cjson, command_params_cjson) {
-                auto name_cjson = cJSON_GetObjectItemCaseSensitive(cmd_param_cjson, "name");
-                auto value_cjson = cJSON_GetObjectItemCaseSensitive(cmd_param_cjson, "value");
-                arguments[std::string(name_cjson->valuestring)] = std::string(value_cjson->valuestring);
+            if (command_json.has_object_item("params")) {
+                auto command_params_json = command_json.item("params");
+                for(int i = 0; i < command_params_json.array_size(); ++i)
+                {
+                    auto name = command_params_json.item(i).item("name").string();
+                    auto value = command_params_json.item(i).item("value").string();
+                    arguments[name] = value;
+                }
             }
             std::string cmd_output;
-            bool cmd_result = RunPluginScript("scripts/commands/" + command_name_str + ".sh", arguments, cmd_output);
-            cJSON_SetValuestring(accept_command_state_cjson, "ACKED");
-            cJSON_AddStringToObject(accept_result_cjson, "response", cmd_output.c_str());
+            bool cmd_result = RunPluginScript("scripts/commands/" + command_json.item("name").string() + ".sh", arguments, cmd_output);
+            cmd_accept_json["params"]["commandState"].set_string(cmd_result ? "ACKED" : "ERRORED");
+            cmd_accept_json["params"]["commandAcks"][0]["result"].add_item_to_object("response", cmd_output.c_str());
 
-            std::string notify_plugin_update = Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_update_template.json");
-            auto np_update_cjson = cJSON_Parse(notify_plugin_update.c_str());
-            auto np_params_cjson = cJSON_GetObjectItemCaseSensitive(np_update_cjson, "params");
-            auto modules_cjson = cJSON_GetObjectItemCaseSensitive(np_params_cjson, "modules");
-            auto module_cjson = cJSON_GetArrayItem(modules_cjson, 0);
-            auto states_cjson = cJSON_GetObjectItemCaseSensitive(module_cjson, "states");
+            auto np_update_json = AJson::create(Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_update_template.json"));
+            auto states_json = np_update_json.item("params").item("modules").item(0).item("states");
 
-            const cJSON *state_cjson = NULL;
-            cJSON_ArrayForEach(state_cjson, states_cjson)
+            for (int i = 0; i < states_json.array_size(); ++i)
             {
-                auto state_name_cjson = cJSON_GetObjectItemCaseSensitive(state_cjson, "name"); 
-                auto state_name_str = std::string(cJSON_GetStringValue(state_name_cjson));
+                auto state_name = states_json.item(i).item("name").string();
                 std::string value_output;
-                if (!RunPluginScript("scripts/states/" + state_name_str + ".sh", {}, value_output))
+                if (!RunPluginScript("scripts/states/" + state_name + ".sh", {}, value_output))
                     value_output = "N/A";
-                auto state_output_cjson = cJSON_CreateObject();
-                cJSON_AddStringToObject(state_output_cjson, "name", state_name_str.c_str());
-                cJSON_AddStringToObject(state_output_cjson, "value", value_output.c_str());
-                cJSON_AddItemToArray(accept_states_cjson, state_output_cjson);
+                auto state_output_json = AJson::create_object({{"name", state_name.c_str()},
+                                                               {"value", value_output.c_str()}});
+                cmd_accept_json["params"]["states"].add_item_to_array(state_output_json);
             }
 
-            char *cmd_ack_str_ptr = cJSON_Print(cmd_accept_cjson);
-            auto cmd_ack_str = std::string(cmd_ack_str_ptr);
-            delete cmd_ack_str_ptr;
-
-            if (!m_json_validator->Sign(cmd_ack_str))
+            auto cmd_ack_str = cmd_accept_json.print(false);
+            if (!octo_->sign(cmd_ack_str))
             {
-                std::cerr << m_json_validator->error_message().c_str() << std::endl;
-                cJSON_Delete(cmd_cjson);
-                cJSON_Delete(cmd_accept_cjson);
-                cJSON_Delete(np_update_cjson);
+                std::cerr << octo_->error_message().c_str() << std::endl;
+                std::cerr << "Error code: " << std::to_string(static_cast<int>(octo_->error_code())) << std::endl;
                 return;
             }
 
             m_endpoint.send(m_hdl, cmd_ack_str.c_str(), websocketpp::frame::opcode::TEXT);
             std::cout << "Send:" << std::endl;
             std::cout << cmd_ack_str << std::endl;
-            cJSON_Delete(cmd_cjson);
-            cJSON_Delete(cmd_accept_cjson);
-            cJSON_Delete(np_update_cjson);
         }
     }
 
@@ -413,13 +359,13 @@ private:
     websocketpp::lib::shared_ptr<std::thread> m_run_thread;
     websocketpp::lib::shared_ptr<std::thread> m_send_thread;
     bool m_connection_established = false;
-    std::shared_ptr<Allxon::JsonValidator> m_json_validator;
+    std::shared_ptr<Allxon::Octo> octo_;
     std::queue<std::string> m_cmd_queue;
     std::string m_url;
 
 public:
-    WebSocketClient(std::shared_ptr<Allxon::JsonValidator> json_validator, const std::string &url) 
-        : m_json_validator(json_validator), m_url(url)
+    WebSocketClient(std::shared_ptr<Allxon::Octo> octo, const std::string &url)
+        : octo_(octo), m_url(url)
     {
         m_endpoint.set_reuse_addr(true);
         m_endpoint.clear_access_channels(websocketpp::log::alevel::all);
@@ -489,11 +435,11 @@ int main(int argc, char **argv)
         return 1;
     }
     Util::plugin_install_dir = std::string(argv[1]);
-    auto np_update_json = Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_update_template.json");
-    auto json_validator = std::make_shared<JsonValidator>(PLUGIN_NAME, PLUGIN_APP_GUID,
-                                                          PLUGIN_ACCESS_KEY, PLUGIN_VERSION,
-                                                          np_update_json);
-    WebSocketClient web_client(json_validator, "wss://127.0.0.1:55688");
+    WebSocketClient web_client(std::make_shared<Octo>(
+                                   PLUGIN_NAME, PLUGIN_APP_GUID,
+                                   PLUGIN_ACCESS_KEY, PLUGIN_VERSION,
+                                   Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_update_template.json")),
+                               "wss://127.0.0.1:55688");
     web_client.RunSendingLoop();
     return 0;
 }

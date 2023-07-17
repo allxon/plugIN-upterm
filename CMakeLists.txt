@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.23)
 project(plugIN-upterm VERSION 0.0.0)
-set(OCTO_SDK_VERSION 3.0.1)
+set(OCTO_SDK_VERSION 3.3.0)
 
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -86,6 +86,13 @@ message("PLUGIN_APP_GUID: ${PLUGIN_APP_GUID}")
 message("PLUGIN_ACCESS_KEY: ${PLUGIN_ACCESS_KEY}")
 message("BUILD_FROM_SDK_SRC: ${BUILD_FROM_SDK_SRC}")
 
+add_compile_definitions(
+    PLUGIN_NAME="${PLUGIN_NAME}"
+    PLUGIN_VERSION="${PLUGIN_VERSION}"
+    PLUGIN_APP_GUID="${PLUGIN_APP_GUID}"
+    PLUGIN_ACCESS_KEY="${PLUGIN_ACCESS_KEY}"
+)
+
 include(FetchContent)
 if (BUILD_FROM_SDK_SRC)
     FetchContent_Declare(
@@ -119,10 +126,8 @@ else()
     endif()
 endif()
 
-configure_file(build_info.h.in build_info.h @ONLY)
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
 aux_source_directory(${PROJECT_SOURCE_DIR}/src SOURCE_FILE)
-add_executable(${CMAKE_PROJECT_NAME} ${SOURCE_FILE} ${PROJECT_SOURCE_DIR}/dep/cJSON/cJSON.c)
+add_executable(${CMAKE_PROJECT_NAME} ${SOURCE_FILE})
 
 if(WIN32 AND MSVC)
     add_definitions (-D_WEBSOCKETPP_CPP11_STL_)
@@ -152,7 +157,6 @@ endif()
 list(APPEND EXTRA_INCLUDES ${octo_sdk_SOURCE_DIR}/include
                            ${PROJECT_SOURCE_DIR}/dep/asio/asio/include
                            ${PROJECT_SOURCE_DIR}/dep/websocketpp
-                           ${PROJECT_SOURCE_DIR}/dep/cJSON
     )
 
 target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC ${LINK_LIBS})
