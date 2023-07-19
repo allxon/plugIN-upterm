@@ -6,4 +6,3 @@ build_info.h
 resource_dir_linux/scripts/*/*.output
 resource_dir_linux/scripts/*/*.current
 build/*
-.vscode/*
