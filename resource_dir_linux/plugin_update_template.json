@@ -16,8 +16,7 @@
         "properties": [
           {
             "name": "officialSite",
-            "displayName": "Powered by",
-            "description": "",
+            "displayName": "i-m-upterm-p-officialSite",
             "displayType": "link",
             "value":
             {
@@ -27,8 +26,7 @@
           },
           {
             "name": "license",
-            "displayName": "LICENSE",
-            "description": "",
+            "displayName": "i-m-upterm-p-license",
             "displayType": "link",
             "value":
             {
@@ -41,20 +39,20 @@
         "states": [
           {
             "name": "version",
-            "displayName": "Version",
-            "description": "The software version of upterm.",
+            "displayName": "i-m-upterm-s-version",
+            "description": "i-m-upterm-s-version-d",
             "displayType": "string"
           },
           {
             "name": "status",
-            "displayName": "Session",
-            "description": "Running status of upterm.",
+            "displayName": "i-m-upterm-s-status",
+            "description": "i-m-upterm-s-status-d",
             "displayType": "string"
           },
           {
             "name": "ssh",
-            "displayName": "SSH Session",
-            "description": "Copy and paste the SSH session in the local terminal.\nNote: If you get \"Permission denied\", please follow user guide to generate an ED25519 key pair on the client side for authentication.",
+            "displayName": "i-m-upterm-s-ssh",
+            "description": "i-m-upterm-s-ssh-d",
             "displayType": "string"
           }
         ],
@@ -62,22 +60,22 @@
           {
             "name": "start",
             "type": "asynchronous",
-            "displayCategory": "Session",
-            "displayName": "Open session",
-            "description": "Open a upterm session to enable instant terminal sharing.",
+            "displayCategory": "i-m-upterm-c-start-dc",
+            "displayName": "i-m-upterm-c-start",
+            "description": "i-m-upterm-c-start-d",
             "params": [
               {
                 "name": "password",
-                "displayName": "Password",
-                "description": "Set a password for the user account upterm",
+                "displayName": "i-m-upterm-c-p-password",
+                "description": "i-m-upterm-c-p-password-d",
                 "displayType": "string",
                 "required": true,
                 "defaultValue": "upterm"
               },
               {
                 "name": "server_url",
-                "displayName": "Server",
-                "description": "upterm server address (required)",
+                "displayName": "i-m-upterm-c-p-server_url",
+                "description": "i-m-upterm-c-p-server_url-d",
                 "displayType": "string",
                 "required": true,
                 "defaultValue": "ssh://uptermd.upterm.dev:22"
@@ -87,25 +85,25 @@
           {
             "name": "stop",
             "type": "asynchronous",
-            "displayCategory": "Session",
-            "displayName": "Close session",
-            "description": "Close the upterm session to terminate terminal sharing.",
+            "displayCategory": "i-m-upterm-c-stop-dc",
+            "displayName": "i-m-upterm-c-stop",
+            "description": "i-m-upterm-c-stop-d",
             "params": []
           },
           {
             "name": "install",
             "type": "asynchronous",
-            "displayCategory": "Installation",
-            "displayName": "Install upterm",
-            "description": "Install upterm to be able to do instant terminal sharing.",
+            "displayCategory": "i-m-upterm-c-install-dc",
+            "displayName": "i-m-upterm-c-install",
+            "description": "i-m-upterm-c-install-d",
             "params": []
           },
           {
             "name": "uninstall",
             "type": "asynchronous",
-            "displayCategory": "Installation",
-            "displayName": "Uninstall upterm",
-            "description": "Uninstall upterm.",
+            "displayCategory": "i-m-upterm-c-uninstall-dc",
+            "displayName": "i-m-upterm-c-uninstall",
+            "description": "i-m-upterm-c-uninstall-d",
             "params": []
           }
         ],
