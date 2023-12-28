@@ -161,8 +161,6 @@ private:
     void OnClose(websocketpp::connection_hdl hdl)
     {
         std::cout << "OnClose" << std::endl;
-        m_endpoint.close(hdl, websocketpp::close::status::normal, "Connection closed");
-        m_endpoint.stop();
         set_connection_established(false);
         exit(0);
     }
@@ -170,9 +168,8 @@ private:
     {
         std::cout << "OnFail" << std::endl;
         m_endpoint.get_alog().write(websocketpp::log::alevel::app, "Connection Failed");
-        m_endpoint.close(hdl, websocketpp::close::status::normal, "Connection Failed.");
-        m_endpoint.stop();
         set_connection_established(false);
+        exit(1);
     }
     void OnMessage(websocketpp::connection_hdl hdl, client::message_ptr msg)
     {
