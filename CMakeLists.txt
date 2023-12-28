@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.23)
-project(plugIN-upterm VERSION 0.0.0)
+project(plugIN-upterm VERSION 3.2.1)
 set(OCTO_SDK_VERSION 3.3.1)
 
 # specify the C++ standard
