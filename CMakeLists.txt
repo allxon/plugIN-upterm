@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.23)
 project(plugIN-upterm VERSION 0.0.0)
-set(OCTO_SDK_VERSION 3.3.1)
+set(OCTO_SDK_VERSION 3.4.1)
 
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -151,7 +151,9 @@ if(WIN32 AND MSVC)
         COMMAND ${CMAKE_COMMAND} -E copy ${OPENSSL_DLL_PATH}libcrypto-1_1${OPENSSL_DLL_SUFFIX}.dll ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/ 
     )
 elseif(UNIX AND NOT APPLE)
-    list(APPEND LINK_LIBS ${octo_sdk_TARGET} -pthread -lcrypto -lssl)
+    set(OPENSSL_USE_STATIC_LIBS true)
+    find_package(OpenSSL REQUIRED COMPONENTS Crypto SSL)
+    list(APPEND LINK_LIBS ${octo_sdk_TARGET} OpenSSL::SSL OpenSSL::Crypto)
 endif()
 
 list(APPEND EXTRA_INCLUDES ${octo_sdk_SOURCE_DIR}/include
